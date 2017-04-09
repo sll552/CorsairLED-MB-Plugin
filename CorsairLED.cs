@@ -3,6 +3,13 @@ using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Collections.Generic;
+using System.Diagnostics;
+using CUE.NET;
+using CUE.NET.Devices;
+using CUE.NET.Devices.Keyboard;
+using CUE.NET.Exceptions;
+using CUE.NET.Devices.Generic.Enums;
+using CUE.NET.Devices.Keyboard.Enums;
 
 namespace MusicBeePlugin
 {
@@ -28,6 +35,7 @@ namespace MusicBeePlugin
             about.MinApiRevision = MinApiRevision;
             about.ReceiveNotifications = (ReceiveNotificationFlags.PlayerEvents | ReceiveNotificationFlags.TagEvents);
             about.ConfigurationPanelHeight = 0;   // height in pixels that musicbee should reserve in a panel for config settings. When set, a handle to an empty panel will be passed to the Configure function
+            Debug.WriteLine(about.Name + " loaded");
             return about;
         }
 
@@ -49,6 +57,8 @@ namespace MusicBeePlugin
                 textBox.Bounds = new Rectangle(60, 0, 100, textBox.Height);
                 configPanel.Controls.AddRange(new Control[] { prompt, textBox });
             }
+            Debug.WriteLine(about.Name + " Configure called");
+            InitCUE();
             return false;
         }
        
@@ -117,5 +127,31 @@ namespace MusicBeePlugin
             //Return Convert.ToBase64String(artworkBinaryData)
             return null;
         }
-   }
+
+        public void InitCUE()
+        {
+            try
+            {
+                CueSDK.Initialize(true);
+                Debug.WriteLine("Initialized with " + CueSDK.LoadedArchitecture + "-SDK");
+
+                CorsairKeyboard keyboard = CueSDK.KeyboardSDK;
+                if (keyboard == null)
+                    throw new WrapperException("No keyboard found");
+
+                keyboard['A'].Color = Color.Red;
+                keyboard[CorsairKeyboardLedId.B].Color = Color.Green;
+                keyboard.Update();
+            }
+            catch (CUEException ex)
+            {
+                Debug.WriteLine("CUE Exception! ErrorCode: " + Enum.GetName(typeof(CorsairError), ex.Error));
+            }
+            catch (WrapperException ex)
+            {
+                Debug.WriteLine("Wrapper Exception! Message:" + ex.Message);
+            }
+
+        }
+    }
 }
