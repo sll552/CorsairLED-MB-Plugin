@@ -17,6 +17,7 @@ namespace MusicBeePlugin
   {
     private MusicBeeApiInterface mbApiInterface;
     private PluginInfo about = new PluginInfo();
+    private CL_Settings settings = new CL_Settings();
 
     public PluginInfo Initialise(IntPtr apiInterfacePtr)
     {
@@ -47,7 +48,9 @@ namespace MusicBeePlugin
 
       Debug.WriteLine(about.Name + " Configure called");
       InitCUE();
-      return false;
+      settings.Show();
+      // This prevents showing the About Box by MusicBee
+      return true;
     }
 
     // called by MusicBee when the user clicks Apply or Save in the MusicBee Preferences screen.
