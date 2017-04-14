@@ -14,20 +14,22 @@ namespace MusicBeePlugin
   {
     private CL_DeviceController deviceController = null;
 
-    public CL_Settings() : this(null)
-    {
-    }
-
     public CL_Settings(CL_DeviceController dc)
     {
-      if (dc != null)
-      {
-        this.deviceController = dc;
-      }
+      this.deviceController = dc ?? throw new ArgumentNullException("dc");
       InitializeComponent();
+      if (dc.IsInitialized())
+      {
+        UpdateValues();
+      }      
     }
 
-    private void button1_Click(object sender, EventArgs e)
+    private void UpdateValues()
+    {
+      this.detectedKeyboardLabel.Text = deviceController.getKeyboardModel();
+    }
+
+    private void saveCloseButton_Click(object sender, EventArgs e)
     {
       this.Hide();
     }
