@@ -15,6 +15,7 @@ namespace MusicBeePlugin
     private PluginInfo about = new PluginInfo();
     private CL_Settings settings;
     private CL_DeviceController devcontroller = new CL_DeviceController();
+    private CL_DebugPlot debugplot = new CL_DebugPlot();
 
     public PluginInfo Initialise(IntPtr apiInterfacePtr)
     {
@@ -34,6 +35,8 @@ namespace MusicBeePlugin
       about.ReceiveNotifications = (ReceiveNotificationFlags.PlayerEvents | ReceiveNotificationFlags.TagEvents);
       about.ConfigurationPanelHeight = 0;   // height in pixels that musicbee should reserve in a panel for config settings. When set, a handle to an empty panel will be passed to the Configure function
 
+      mbApiInterface.MB_AddMenuItem("mnuTools/CL_Show Debug Plot", "HotKey For CL Debug Plot", showDebugPlot);
+
       try
       {
         devcontroller.Init();
@@ -45,10 +48,26 @@ namespace MusicBeePlugin
       catch (CUEException ex)
       {
         Debug.WriteLine("CUE Exception! ErrorCode: " + Enum.GetName(typeof(CorsairError), ex.Error));
+        return null;
       }
 
       Debug.WriteLine(about.Name + " loaded");
       return about;
+    }
+
+    private void showDebugPlot(object sender, EventArgs e)
+    {
+      debugplot.Show();
+      float[] data = new float[100]; 
+      for (int i = 0; i < 100; i++)
+      {
+        data[i] = i;
+        if (i > data.Length/2)
+        {
+          data[i] = data.Length - i;
+        }
+      }
+      debugplot.UpdatePlot(data);
     }
 
     public bool Configure(IntPtr panelHandle)
