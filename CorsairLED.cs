@@ -11,38 +11,38 @@ namespace MusicBeePlugin
 {
   public partial class Plugin
   {
-    private MusicBeeApiInterface mbApiInterface;
-    private PluginInfo about = new PluginInfo();
-    private CL_Settings settings;
-    private CL_DeviceController devcontroller = new CL_DeviceController();
-    private CL_DebugPlot debugplot = new CL_DebugPlot();
+    private MusicBeeApiInterface _mbApiInterface;
+    private PluginInfo _about = new PluginInfo();
+    private ClSettings _settings;
+    private ClDeviceController _devcontroller = new ClDeviceController();
+    private ClDebugPlot _debugplot = new ClDebugPlot();
 
     public PluginInfo Initialise(IntPtr apiInterfacePtr)
     {
-      mbApiInterface = new MusicBeeApiInterface();
-      mbApiInterface.Initialise(apiInterfacePtr);
-      about.PluginInfoVersion = PluginInfoVersion;
-      about.Name = "CorsairLED";
-      about.Description = "Adds Support for Corsair CUE Devices";
-      about.Author = "Stefan Lengauer";
-      about.TargetApplication = "";   // current only applies to artwork, lyrics or instant messenger name that appears in the provider drop down selector or target Instant Messenger
-      about.Type = PluginType.General;
-      about.VersionMajor = 0;  // your plugin version
-      about.VersionMinor = 1;
-      about.Revision = 1;
-      about.MinInterfaceVersion = MinInterfaceVersion;
-      about.MinApiRevision = MinApiRevision;
-      about.ReceiveNotifications = (ReceiveNotificationFlags.PlayerEvents | ReceiveNotificationFlags.TagEvents);
-      about.ConfigurationPanelHeight = 0;   // height in pixels that musicbee should reserve in a panel for config settings. When set, a handle to an empty panel will be passed to the Configure function
+      _mbApiInterface = new MusicBeeApiInterface();
+      _mbApiInterface.Initialise(apiInterfacePtr);
+      _about.PluginInfoVersion = PluginInfoVersion;
+      _about.Name = "CorsairLED";
+      _about.Description = "Adds Support for Corsair CUE Devices";
+      _about.Author = "Stefan Lengauer";
+      _about.TargetApplication = "";   // current only applies to artwork, lyrics or instant messenger name that appears in the provider drop down selector or target Instant Messenger
+      _about.Type = PluginType.General;
+      _about.VersionMajor = 0;  // your plugin version
+      _about.VersionMinor = 1;
+      _about.Revision = 1;
+      _about.MinInterfaceVersion = MinInterfaceVersion;
+      _about.MinApiRevision = MinApiRevision;
+      _about.ReceiveNotifications = (ReceiveNotificationFlags.PlayerEvents | ReceiveNotificationFlags.TagEvents);
+      _about.ConfigurationPanelHeight = 0;   // height in pixels that musicbee should reserve in a panel for config settings. When set, a handle to an empty panel will be passed to the Configure function
 
-      mbApiInterface.MB_AddMenuItem("mnuTools/CL_Show Debug Plot", "HotKey For CL Debug Plot", showDebugPlot);
+      _mbApiInterface.MB_AddMenuItem("mnuTools/CL_Show Debug Plot", "HotKey For CL Debug Plot", ShowDebugPlot);
 
       try
       {
-        devcontroller.Init();
-        if (devcontroller.IsInitialized())
+        _devcontroller.Init();
+        if (_devcontroller.IsInitialized())
         {
-          settings = new CL_Settings(devcontroller);
+          _settings = new ClSettings(_devcontroller);
         }
       }
       catch (CUEException ex)
@@ -51,13 +51,13 @@ namespace MusicBeePlugin
         return null;
       }
 
-      Debug.WriteLine(about.Name + " loaded");
-      return about;
+      Debug.WriteLine(_about.Name + " loaded");
+      return _about;
     }
 
-    private void showDebugPlot(object sender, EventArgs e)
+    private void ShowDebugPlot(object sender, EventArgs e)
     {
-      debugplot.Show();
+      _debugplot.Show();
       float[] data = new float[100]; 
       for (int i = 0; i < 100; i++)
       {
@@ -67,16 +67,16 @@ namespace MusicBeePlugin
           data[i] = data.Length - i;
         }
       }
-      debugplot.UpdatePlot(data);
+      _debugplot.UpdatePlot(data);
     }
 
     public bool Configure(IntPtr panelHandle)
     {
       // save any persistent settings in a sub-folder of this path
-      string dataPath = mbApiInterface.Setting_GetPersistentStoragePath();
+      string dataPath = _mbApiInterface.Setting_GetPersistentStoragePath();
 
-      Debug.WriteLine(about.Name + " Configure called");
-      settings.Show();
+      Debug.WriteLine(_about.Name + " Configure called");
+      _settings.Show();
       // This prevents showing the About Box by MusicBee
       return true;
     }
@@ -86,7 +86,7 @@ namespace MusicBeePlugin
     public void SaveSettings()
     {
       // save any persistent settings in a sub-folder of this path
-      string dataPath = mbApiInterface.Setting_GetPersistentStoragePath();
+      string dataPath = _mbApiInterface.Setting_GetPersistentStoragePath();
     }
 
     // MusicBee is closing the plugin (plugin is being disabled by user or MusicBee is shutting down)
@@ -108,7 +108,7 @@ namespace MusicBeePlugin
       {
         case NotificationType.PluginStartup:
           // perform startup initialisation
-          switch (mbApiInterface.Player_GetPlayState())
+          switch (_mbApiInterface.Player_GetPlayState())
           {
             case PlayState.Playing:
             case PlayState.Paused:
@@ -117,7 +117,7 @@ namespace MusicBeePlugin
           }
           break;
         case NotificationType.TrackChanged:
-          string artist = mbApiInterface.NowPlaying_GetFileTag(MetaDataType.Artist);
+          string artist = _mbApiInterface.NowPlaying_GetFileTag(MetaDataType.Artist);
           // ...
           break;
       }

@@ -1,6 +1,6 @@
 ﻿namespace MusicBeePlugin
 {
-  partial class CL_Settings
+  partial class ClSettings
   {
     /// <summary>
     /// Required designer variable.
@@ -85,7 +85,7 @@
       this.Controls.Add(this.groupBox1);
       this.MaximizeBox = false;
       this.MinimizeBox = false;
-      this.Name = "CL_Settings";
+      this.Name = "ClSettings";
       this.ShowIcon = false;
       this.Text = "Corsair LED Plugin Settings";
       this.TopMost = true;

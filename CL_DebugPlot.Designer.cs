@@ -3,7 +3,7 @@ using OxyPlot.WindowsForms;
 
 namespace MusicBeePlugin
 {
-  partial class CL_DebugPlot
+  partial class ClDebugPlot
   {
     /// <summary>
     /// Required designer variable.
@@ -53,7 +53,7 @@ namespace MusicBeePlugin
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.ClientSize = new System.Drawing.Size(604, 403);
       this.Controls.Add(this.plotView1);
-      this.Name = "CL_DebugPlot";
+      this.Name = "ClDebugPlot";
       this.Text = "CL_DebugPlot";
       this.ResumeLayout(false);
 

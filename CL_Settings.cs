@@ -1,22 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace MusicBeePlugin
 {
-  public partial class CL_Settings : Form
+  public partial class ClSettings : Form
   {
-    private CL_DeviceController deviceController = null;
+    private readonly ClDeviceController _deviceController;
 
-    public CL_Settings(CL_DeviceController dc)
+    public ClSettings(ClDeviceController dc)
     {
-      this.deviceController = dc ?? throw new ArgumentNullException("dc");
+      _deviceController = dc ?? throw new ArgumentNullException(nameof(dc));
       InitializeComponent();
       if (dc.IsInitialized())
       {
@@ -26,12 +19,15 @@ namespace MusicBeePlugin
 
     private void UpdateValues()
     {
-      this.detectedKeyboardLabel.Text = deviceController.getKeyboardModel();
+      if (detectedKeyboardLabel != null)
+      {
+        detectedKeyboardLabel.Text = _deviceController.GetKeyboardModel();
+      }
     }
 
     private void saveCloseButton_Click(object sender, EventArgs e)
     {
-      this.Hide();
+      Hide();
     }
   }
 }

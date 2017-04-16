@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -14,26 +12,26 @@ using OxyPlot.Series;
 
 namespace MusicBeePlugin
 {
-  public partial class CL_DebugPlot : Form
+  public partial class ClDebugPlot : Form
   {
-    private PlotModel model = new PlotModel { Title = "Debug Spectrograph" };
-    private ColumnSeries series = new ColumnSeries();
+    private PlotModel _model = new PlotModel { Title = "Debug Spectrograph" };
+    private ColumnSeries _series = new ColumnSeries();
 
-    public CL_DebugPlot()
+    public ClDebugPlot()
     {
       InitializeComponent();
-      model.Axes.Add(new CategoryAxis());
-      model.Series.Add(series);
-      plotView1.Model = model;
+      _model.Axes.Add(new CategoryAxis());
+      _model.Series.Add(_series);
+      plotView1.Model = _model;
       this.FormClosing += CL_DebugPlot_FormClosing;
     }
 
     public void UpdatePlot(float[] data)
     {
-      series.Items.Clear();
+      _series.Items.Clear();
       foreach (float item in data)
       {
-        series.Items.Add(new ColumnItem(item));
+        _series.Items.Add(new ColumnItem(item));
       }
       plotView1.Invalidate();
     }

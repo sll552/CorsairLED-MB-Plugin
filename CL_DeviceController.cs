@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
@@ -13,27 +12,27 @@ using CUE.NET.Devices.Keyboard.Enums;
 
 namespace MusicBeePlugin
 {
-  public class CL_DeviceController
+  public class ClDeviceController
   {
-    private bool isinitialized = false;
-    private CorsairKeyboard keyboard;
+    private bool _isinitialized;
+    private CorsairKeyboard _keyboard;
 
     public void Init()
     {
       CueSDK.Initialize(true);
       Debug.WriteLine("Initialized with " + CueSDK.LoadedArchitecture + "-SDK");
-      keyboard = CueSDK.KeyboardSDK;
-      isinitialized = true;
+      _keyboard = CueSDK.KeyboardSDK;
+      _isinitialized = true;
     }
 
     public bool IsInitialized()
     {
-      return isinitialized;
+      return _isinitialized;
     }
 
-    public string getKeyboardModel()
+    public string GetKeyboardModel()
     {
-      return keyboard?.KeyboardDeviceInfo.Model;
+      return _keyboard?.KeyboardDeviceInfo.Model;
     }
   }
 }
