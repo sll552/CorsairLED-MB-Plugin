@@ -14,7 +14,15 @@ namespace MusicBeePlugin
       if (dc.IsInitialized())
       {
         UpdateValues();
-      }      
+      }
+      FormClosing += CL_Settings_FormClosing;
+    }
+
+    private void CL_Settings_FormClosing(object sender, FormClosingEventArgs e)
+    {
+      if (e.CloseReason != CloseReason.UserClosing) return;
+      Hide();
+      e.Cancel = true;
     }
 
     private void UpdateValues()

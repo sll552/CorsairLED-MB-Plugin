@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using System.Drawing;
-using System.Windows.Forms;
-using System.Collections.Generic;
 using System.Diagnostics;
+using System.Timers;
 using CUE.NET.Exceptions;
 using CUE.NET.Devices.Generic.Enums;
 
@@ -12,10 +9,11 @@ namespace MusicBeePlugin
   public partial class Plugin
   {
     private MusicBeeApiInterface _mbApiInterface;
-    private PluginInfo _about = new PluginInfo();
+    private readonly PluginInfo _about = new PluginInfo();
     private ClSettings _settings;
-    private ClDeviceController _devcontroller = new ClDeviceController();
-    private ClDebugPlot _debugplot = new ClDebugPlot();
+    private readonly ClDeviceController _devcontroller = new ClDeviceController();
+    private readonly ClDebugPlot _debugplot = new ClDebugPlot();
+    private Timer _timer = new Timer();
 
     public PluginInfo Initialise(IntPtr apiInterfacePtr)
     {
@@ -51,6 +49,9 @@ namespace MusicBeePlugin
         return null;
       }
 
+      _timer.Elapsed += TimerOnElapsed;
+      _timer.Interval = 250;
+
       Debug.WriteLine(_about.Name + " loaded");
       return _about;
     }
@@ -58,16 +59,6 @@ namespace MusicBeePlugin
     private void ShowDebugPlot(object sender, EventArgs e)
     {
       _debugplot.Show();
-      float[] data = new float[100]; 
-      for (int i = 0; i < 100; i++)
-      {
-        data[i] = i;
-        if (i > data.Length/2)
-        {
-          data[i] = data.Length - i;
-        }
-      }
-      _debugplot.UpdatePlot(data);
     }
 
     public bool Configure(IntPtr panelHandle)
@@ -112,39 +103,38 @@ namespace MusicBeePlugin
           {
             case PlayState.Playing:
             case PlayState.Paused:
-              // ...
               break;
           }
           break;
         case NotificationType.TrackChanged:
-          string artist = _mbApiInterface.NowPlaying_GetFileTag(MetaDataType.Artist);
-          // ...
+          break;
+        case NotificationType.PlayStateChanged:
+          switch (_mbApiInterface.Player_GetPlayState())
+          {
+            case PlayState.Playing:
+              Debug.WriteLine("Playing event");
+              _timer.Start();
+              break;
+            case PlayState.Stopped:
+            case PlayState.Paused:
+              _timer.Stop();
+              break;
+          }
           break;
       }
     }
 
-    // return an array of lyric or artwork provider names this plugin supports
-    // the providers will be iterated through one by one and passed to the RetrieveLyrics/ RetrieveArtwork function in order set by the user in the MusicBee Tags(2) preferences screen until a match is found
-    public string[] GetProviders()
+    private void TimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
     {
-      return null;
-    }
+      float[] data = new float[2048];
+      int ret;
 
-    // return lyrics for the requested artist/title from the requested provider
-    // only required if PluginType = LyricsRetrieval
-    // return null if no lyrics are found
-    public string RetrieveLyrics(string sourceFileUrl, string artist, string trackTitle, string album, bool synchronisedPreferred, string provider)
-    {
-      return null;
-    }
-
-    // return Base64 string representation of the artwork binary data from the requested provider
-    // only required if PluginType = ArtworkRetrieval
-    // return null if no artwork is found
-    public string RetrieveArtwork(string sourceFileUrl, string albumArtist, string album, string provider)
-    {
-      //Return Convert.ToBase64String(artworkBinaryData)
-      return null;
+      ret = _mbApiInterface.NowPlaying_GetSpectrumData(data);
+      Debug.WriteLine("ret = " + ret);
+      if (ret > 0)
+      {
+        _debugplot.UpdatePlot(data);
+      }
     }
   }
 }

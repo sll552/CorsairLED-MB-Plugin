@@ -39,6 +39,7 @@
       // 
       this.groupBox1.Controls.Add(this.detectedKeyboardLabel);
       this.groupBox1.Controls.Add(this.label1);
+      this.groupBox1.ForeColor = System.Drawing.SystemColors.ControlText;
       this.groupBox1.Location = new System.Drawing.Point(13, 13);
       this.groupBox1.Name = "groupBox1";
       this.groupBox1.Size = new System.Drawing.Size(411, 45);
@@ -50,7 +51,7 @@
       // 
       this.detectedKeyboardLabel.AllowDrop = true;
       this.detectedKeyboardLabel.AutoSize = true;
-      this.detectedKeyboardLabel.BackColor = System.Drawing.SystemColors.ControlDarkDark;
+      this.detectedKeyboardLabel.BackColor = System.Drawing.SystemColors.ControlDark;
       this.detectedKeyboardLabel.Location = new System.Drawing.Point(77, 20);
       this.detectedKeyboardLabel.Name = "detectedKeyboardLabel";
       this.detectedKeyboardLabel.Size = new System.Drawing.Size(33, 13);
@@ -77,7 +78,7 @@
       this.saveCloseButton.UseVisualStyleBackColor = true;
       this.saveCloseButton.Click += new System.EventHandler(this.saveCloseButton_Click);
       // 
-      // CL_Settings
+      // ClSettings
       // 
       this.BackColor = System.Drawing.SystemColors.ControlDarkDark;
       this.ClientSize = new System.Drawing.Size(436, 351);
