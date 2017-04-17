@@ -22,14 +22,21 @@ namespace MusicBeePlugin
 
     public void UpdatePlot(float[] data)
     {
-      System.Diagnostics.Debug.WriteLine("UpdatePlot called");
+      float max = 0;
       _series.Items.Clear();
       foreach (float item in data)
       {
         if (item == 0) continue;
-        //System.Diagnostics.Debug.WriteLine("Parse data ["+item+"]");
-        //System.Diagnostics.Debug.WriteLine("Parsed data [" + 20*Math.Log10(item) + "]");
-        _series.Items.Add(new ColumnItem(Math.Abs(Math.Sqrt(item))));
+        if (item > max) max = item;
+        _series.Items.Add(new ColumnItem(item));
+      }
+      foreach (Axis axis in _model.Axes)
+      {
+        if (axis.Position != AxisPosition.Bottom && axis.Maximum <= max)
+        {
+          axis.Maximum = max;
+          axis.Minimum = 0;
+        }
       }
       _model.InvalidatePlot(true);
       plotView1.InvalidatePlot(true);

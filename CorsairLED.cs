@@ -14,6 +14,7 @@ namespace MusicBeePlugin
     private readonly ClDeviceController _devcontroller = new ClDeviceController();
     private readonly ClDebugPlot _debugplot = new ClDebugPlot();
     private Timer _timer = new Timer();
+    private readonly int _barcount = 22;
 
     public PluginInfo Initialise(IntPtr apiInterfacePtr)
     {
@@ -50,7 +51,7 @@ namespace MusicBeePlugin
       }
 
       _timer.Elapsed += TimerOnElapsed;
-      _timer.Interval = 250;
+      _timer.Interval = 15;
 
       Debug.WriteLine(_about.Name + " loaded");
       return _about;
@@ -126,15 +127,46 @@ namespace MusicBeePlugin
 
     private void TimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
     {
-      float[] data = new float[2048];
-      int ret;
-
-      ret = _mbApiInterface.NowPlaying_GetSpectrumData(data);
-      Debug.WriteLine("ret = " + ret);
+      float[] data = new float[4096];
+      var ret = _mbApiInterface.NowPlaying_GetSpectrumData(data);
+      //Debug.WriteLine("ret = " + ret);
       if (ret > 0)
       {
-        _debugplot.UpdatePlot(data);
+        _debugplot.UpdatePlot(CalcBarData(_barcount,data));
       }
+    }
+
+    private float[] CalcBarData(int barcount, float[] fftdata)
+    {
+      float[] bardata = new float[barcount];
+      int jumpwidth = (fftdata.Length/2) / barcount;
+      int bar = 0;
+      float avg;
+
+      for (int i = 0; i < fftdata.Length/2; i+=jumpwidth)
+      {
+        avg = 0;
+        for (int j = i; j < i+jumpwidth && j < fftdata.Length/2; j++)
+        {
+          avg += fftdata[j];
+        }
+        avg /= jumpwidth;
+
+        if (bar < bardata.Length-1)
+        {
+          //bardata[bar] = (float) Math.Sqrt(avg) * 1000f;
+          bardata[bar] = (float) Math.Sqrt(avg) * 10f;
+          //bardata[bar] = (float)Math.Sqrt(avg) * 15f * (1 + (float)Math.Sqrt((double)bar/ (double)_barcount) * 1.25f);
+          //bardata[bar] = (float)Math.Log10(1/(avg*avg)) * 10f;
+        }
+        bar++;
+      }
+      //foreach (var bard in bardata)
+      //{
+      //  Debug.WriteLine(bard);
+      //}
+      bardata[0] *= 0.7f;
+      return bardata;
     }
   }
 }
