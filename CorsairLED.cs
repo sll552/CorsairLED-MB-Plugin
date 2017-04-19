@@ -13,8 +13,8 @@ namespace MusicBeePlugin
     private ClSettings _settings;
     private readonly ClDeviceController _devcontroller = new ClDeviceController();
     private readonly ClDebugPlot _debugplot = new ClDebugPlot();
-    private Timer _timer = new Timer();
-    private readonly int _barcount = 22;
+    private readonly Timer _timer = new Timer();
+    private int _barcount = 22;
 
     public PluginInfo Initialise(IntPtr apiInterfacePtr)
     {
@@ -39,9 +39,10 @@ namespace MusicBeePlugin
       try
       {
         _devcontroller.Init();
-        if (_devcontroller.IsInitialized())
+        if (_devcontroller.IsInitialized)
         {
           _settings = new ClSettings(_devcontroller);
+          _barcount = _devcontroller.GetDesiredBarCount();
         }
       }
       catch (CUEException ex)
@@ -99,13 +100,6 @@ namespace MusicBeePlugin
       switch (type)
       {
         case NotificationType.PluginStartup:
-          // perform startup initialisation
-          switch (_mbApiInterface.Player_GetPlayState())
-          {
-            case PlayState.Playing:
-            case PlayState.Paused:
-              break;
-          }
           break;
         case NotificationType.TrackChanged:
           break;
@@ -113,59 +107,130 @@ namespace MusicBeePlugin
           switch (_mbApiInterface.Player_GetPlayState())
           {
             case PlayState.Playing:
-              Debug.WriteLine("Playing event");
               _timer.Start();
+              _devcontroller.StartEffect();
               break;
             case PlayState.Stopped:
             case PlayState.Paused:
               _timer.Stop();
+              _devcontroller.StopEffect();
               break;
+            case PlayState.Undefined:
+              break;
+            case PlayState.Loading:
+              break;
+            default:
+              throw new ArgumentOutOfRangeException();
           }
+          break;
+        case NotificationType.TrackChanging:
+          break;
+        case NotificationType.AutoDjStarted:
+          break;
+        case NotificationType.AutoDjStopped:
+          break;
+        case NotificationType.VolumeMuteChanged:
+          break;
+        case NotificationType.VolumeLevelChanged:
+          break;
+        case NotificationType.NowPlayingListChanged:
+          break;
+        case NotificationType.NowPlayingListEnded:
+          break;
+        case NotificationType.NowPlayingArtworkReady:
+          break;
+        case NotificationType.NowPlayingLyricsReady:
+          break;
+        case NotificationType.TagsChanging:
+          break;
+        case NotificationType.TagsChanged:
+          break;
+        case NotificationType.RatingChanging:
+          break;
+        case NotificationType.RatingChanged:
+          break;
+        case NotificationType.PlayCountersChanged:
+          break;
+        case NotificationType.ScreenSaverActivating:
+          break;
+        case NotificationType.ShutdownStarted:
+          break;
+        case NotificationType.EmbedInPanel:
+          break;
+        case NotificationType.PlayerRepeatChanged:
+          break;
+        case NotificationType.PlayerShuffleChanged:
+          break;
+        case NotificationType.PlayerEqualiserOnOffChanged:
+          break;
+        case NotificationType.PlayerScrobbleChanged:
+          break;
+        case NotificationType.ReplayGainChanged:
+          break;
+        case NotificationType.FileDeleting:
+          break;
+        case NotificationType.FileDeleted:
+          break;
+        case NotificationType.ApplicationWindowChanged:
+          break;
+        case NotificationType.StopAfterCurrentChanged:
+          break;
+        case NotificationType.LibrarySwitched:
+          break;
+        case NotificationType.FileAddedToLibrary:
+          break;
+        case NotificationType.FileAddedToInbox:
+          break;
+        case NotificationType.SynchCompleted:
+          break;
+        case NotificationType.DownloadCompleted:
+          break;
+        case NotificationType.MusicBeeStarted:
           break;
       }
     }
 
     private void TimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
     {
-      float[] data = new float[4096];
-      var ret = _mbApiInterface.NowPlaying_GetSpectrumData(data);
-      //Debug.WriteLine("ret = " + ret);
-      if (ret > 0)
-      {
-        _debugplot.UpdatePlot(CalcBarData(_barcount,data));
-      }
+      float[] bardata = CalcBarData(_barcount);
+      _devcontroller.Curbardata = bardata;
+      _debugplot.UpdatePlot(bardata);
     }
 
-    private float[] CalcBarData(int barcount, float[] fftdata)
+    private float[] CalcBarData(int barcount)
     {
       float[] bardata = new float[barcount];
+      float[] fftdata = new float[4096];
+      var ret = _mbApiInterface.NowPlaying_GetSpectrumData(fftdata);
       int jumpwidth = (fftdata.Length/2) / barcount;
       int bar = 0;
-      float avg;
 
-      for (int i = 0; i < fftdata.Length/2; i+=jumpwidth)
+      if (ret > 0)
       {
-        avg = 0;
-        for (int j = i; j < i+jumpwidth && j < fftdata.Length/2; j++)
+        for (int i = 0; i < fftdata.Length / 2; i += jumpwidth)
         {
-          avg += fftdata[j];
-        }
-        avg /= jumpwidth;
+          float avg = 0;
+          for (int j = i; j < i + jumpwidth && j < fftdata.Length / 2; j++)
+          {
+            avg += fftdata[j];
+          }
+          avg /= jumpwidth;
 
-        if (bar < bardata.Length-1)
-        {
-          //bardata[bar] = (float) Math.Sqrt(avg) * 1000f;
-          bardata[bar] = (float) Math.Sqrt(avg) * 10f;
-          //bardata[bar] = (float)Math.Sqrt(avg) * 15f * (1 + (float)Math.Sqrt((double)bar/ (double)_barcount) * 1.25f);
-          //bardata[bar] = (float)Math.Log10(1/(avg*avg)) * 10f;
+          if (bar < bardata.Length - 1)
+          {
+            //bardata[bar] = (float) Math.Sqrt(avg) * 1000f;
+            bardata[bar] = (float)Math.Sqrt(avg) * 10f;
+            //bardata[bar] = (float)Math.Sqrt(avg) * 15f * (1 + (float)Math.Sqrt((double)bar/ (double)_barcount) * 1.25f);
+            //bardata[bar] = (float)Math.Log10(1/(avg*avg)) * 10f;
+          }
+          bar++;
         }
-        bar++;
+        //foreach (var bard in bardata)
+        //{
+        //  Debug.WriteLine(bard);
+        //}
+        bardata[0] *= 0.7f; 
       }
-      //foreach (var bard in bardata)
-      //{
-      //  Debug.WriteLine(bard);
-      //}
-      bardata[0] *= 0.7f;
       return bardata;
     }
   }

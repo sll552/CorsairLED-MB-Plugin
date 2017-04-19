@@ -11,7 +11,7 @@ namespace MusicBeePlugin
     {
       _deviceController = dc ?? throw new ArgumentNullException(nameof(dc));
       InitializeComponent();
-      if (dc.IsInitialized())
+      if (dc.IsInitialized)
       {
         UpdateValues();
       }

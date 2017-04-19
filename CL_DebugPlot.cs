@@ -23,6 +23,12 @@ namespace MusicBeePlugin
     public void UpdatePlot(float[] data)
     {
       float max = 0;
+
+      if (!Visible)
+      {
+        return;
+      }
+
       _series.Items.Clear();
       foreach (float item in data)
       {
@@ -38,6 +44,7 @@ namespace MusicBeePlugin
           axis.Minimum = 0;
         }
       }
+
       _model.InvalidatePlot(true);
       plotView1.InvalidatePlot(true);
       plotView1.Invalidate();

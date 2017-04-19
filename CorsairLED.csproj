@@ -91,6 +91,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CL_SolidSpectrumBrush.cs" />
     <Compile Include="CL_DebugPlot.cs">
       <SubType>Form</SubType>
     </Compile>
