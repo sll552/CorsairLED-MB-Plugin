@@ -111,9 +111,11 @@ namespace MusicBeePlugin
               _devcontroller.StartEffect();
               break;
             case PlayState.Stopped:
+              _devcontroller.StopEffect();
+              _timer.Stop();
+              break;
             case PlayState.Paused:
               _timer.Stop();
-              _devcontroller.StopEffect();
               break;
             case PlayState.Undefined:
               break;

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
@@ -11,6 +10,7 @@ using CUE.NET.Devices.Keyboard;
 using CUE.NET.Devices.Keyboard.Enums;
 using CUE.NET.Exceptions;
 using CUE.NET.Groups;
+using CUE.NET.Groups.Extensions;
 
 namespace MusicBeePlugin
 {
@@ -18,17 +18,28 @@ namespace MusicBeePlugin
   {
     private CorsairKeyboard _keyboard;
     private float[] _curbardata;
-    private ListLedGroup spectrumGroup;
+    private ListLedGroup _spectrumGroup;
+    private bool _firstinit = true;
 
     public float[] Curbardata { get => IsInitialized ? _curbardata : null; set => _curbardata = value; }
     public bool IsInitialized { get; private set; }
 
     public void Init()
     {
+      if (IsInitialized) return;
       try
       {
-        CueSDK.Initialize(true);
+        if (_firstinit)
+        {
+          CueSDK.Initialize(true);
+          _firstinit = false;
+        }
+        else
+        {
+          CueSDK.Reinitialize(true);
+        }
         CueSDK.UpdateMode = UpdateMode.Continuous;
+        CueSDK.UpdateFrequency = 1f / 60f;
         Debug.WriteLine("Initialized with " + CueSDK.LoadedArchitecture + "-SDK");
         _keyboard = CueSDK.KeyboardSDK;
         IsInitialized = true;
@@ -38,6 +49,13 @@ namespace MusicBeePlugin
         Console.WriteLine(e);
         throw;
       }
+    }
+
+    public void UnInit()
+    {
+      if (!IsInitialized) return;
+      CueSDK.Reinitialize(false);
+      IsInitialized = false;
     }
 
     public string GetKeyboardModel()
@@ -58,14 +76,26 @@ namespace MusicBeePlugin
 
     public void StartEffect()
     {
-      if (!IsInitialized)return;
-      spectrumGroup = new ListLedGroup(_keyboard, _keyboard) {Brush = new ClSolidSpectrumBrush(Color.Red, this)};
+      if (!IsInitialized)
+      {
+        Init();
+      }
+      _keyboard.Brush = new SolidColorBrush(Color.Black);
+      _spectrumGroup = new ListLedGroup(_keyboard, _keyboard) {Brush = new ClSolidSpectrumBrush(Color.Red, this)};
 
     }
 
     public void StopEffect()
     {
-      _keyboard.DetachLedGroup(spectrumGroup);
+      if (IsInitialized)
+      {
+        UnInit();
+      }
+      _keyboard.DetachLedGroup(_spectrumGroup);
+      _keyboard.Brush = null;
+      _spectrumGroup.RemoveLeds(_keyboard);
+      _spectrumGroup.Detach();
+      _spectrumGroup = null;
     }
   }
 }
