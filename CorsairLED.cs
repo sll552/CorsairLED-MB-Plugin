@@ -1,121 +1,239 @@
 ﻿using System;
-using System.Runtime.InteropServices;
-using System.Drawing;
-using System.Windows.Forms;
-using System.Collections.Generic;
+using System.Diagnostics;
+using System.Timers;
+using CUE.NET.Exceptions;
+using CUE.NET.Devices.Generic.Enums;
 
 namespace MusicBeePlugin
 {
-    public partial class Plugin
+  public partial class Plugin
+  {
+    private MusicBeeApiInterface _mbApiInterface;
+    private readonly PluginInfo _about = new PluginInfo();
+    private ClSettings _settings;
+    private readonly ClDeviceController _devcontroller = new ClDeviceController();
+    private readonly ClDebugPlot _debugplot = new ClDebugPlot();
+    private readonly Timer _timer = new Timer();
+    private int _barcount = 22;
+
+    public PluginInfo Initialise(IntPtr apiInterfacePtr)
     {
-        private MusicBeeApiInterface mbApiInterface;
-        private PluginInfo about = new PluginInfo();
+      _mbApiInterface = new MusicBeeApiInterface();
+      _mbApiInterface.Initialise(apiInterfacePtr);
+      _about.PluginInfoVersion = PluginInfoVersion;
+      _about.Name = "CorsairLED";
+      _about.Description = "Adds Support for Corsair CUE Devices";
+      _about.Author = "Stefan Lengauer";
+      _about.TargetApplication = "";   // current only applies to artwork, lyrics or instant messenger name that appears in the provider drop down selector or target Instant Messenger
+      _about.Type = PluginType.General;
+      _about.VersionMajor = 0;  // your plugin version
+      _about.VersionMinor = 1;
+      _about.Revision = 1;
+      _about.MinInterfaceVersion = MinInterfaceVersion;
+      _about.MinApiRevision = MinApiRevision;
+      _about.ReceiveNotifications = (ReceiveNotificationFlags.PlayerEvents | ReceiveNotificationFlags.TagEvents);
+      _about.ConfigurationPanelHeight = 0;   // height in pixels that musicbee should reserve in a panel for config settings. When set, a handle to an empty panel will be passed to the Configure function
 
-        public PluginInfo Initialise(IntPtr apiInterfacePtr)
-        {
-            mbApiInterface = new MusicBeeApiInterface();
-            mbApiInterface.Initialise(apiInterfacePtr);
-            about.PluginInfoVersion = PluginInfoVersion;
-            about.Name = "CorsairLED";
-            about.Description = "Adds Support for Corsair CUE Devices";
-            about.Author = "Stefan Lengauer";
-            about.TargetApplication = "";   // current only applies to artwork, lyrics or instant messenger name that appears in the provider drop down selector or target Instant Messenger
-            about.Type = PluginType.General;
-            about.VersionMajor = 0;  // your plugin version
-            about.VersionMinor = 1;
-            about.Revision = 1;
-            about.MinInterfaceVersion = MinInterfaceVersion;
-            about.MinApiRevision = MinApiRevision;
-            about.ReceiveNotifications = (ReceiveNotificationFlags.PlayerEvents | ReceiveNotificationFlags.TagEvents);
-            about.ConfigurationPanelHeight = 0;   // height in pixels that musicbee should reserve in a panel for config settings. When set, a handle to an empty panel will be passed to the Configure function
-            return about;
-        }
+      _mbApiInterface.MB_AddMenuItem("mnuTools/CL_Show Debug Plot", "HotKey For CL Debug Plot", ShowDebugPlot);
 
-        public bool Configure(IntPtr panelHandle)
+      try
+      {
+        _devcontroller.Init();
+        if (_devcontroller.IsInitialized)
         {
-            // save any persistent settings in a sub-folder of this path
-            string dataPath = mbApiInterface.Setting_GetPersistentStoragePath();
-            // panelHandle will only be set if you set about.ConfigurationPanelHeight to a non-zero value
-            // keep in mind the panel width is scaled according to the font the user has selected
-            // if about.ConfigurationPanelHeight is set to 0, you can display your own popup window
-            if (panelHandle != IntPtr.Zero)
-            {
-                Panel configPanel = (Panel)Panel.FromHandle(panelHandle);
-                Label prompt = new Label();
-                prompt.AutoSize = true;
-                prompt.Location = new Point(0, 0);
-                prompt.Text = "prompt:";
-                TextBox textBox = new TextBox();
-                textBox.Bounds = new Rectangle(60, 0, 100, textBox.Height);
-                configPanel.Controls.AddRange(new Control[] { prompt, textBox });
-            }
-            return false;
+          _settings = new ClSettings(_devcontroller);
+          _barcount = _devcontroller.GetDesiredBarCount();
         }
-       
-        // called by MusicBee when the user clicks Apply or Save in the MusicBee Preferences screen.
-        // its up to you to figure out whether anything has changed and needs updating
-        public void SaveSettings()
-        {
-            // save any persistent settings in a sub-folder of this path
-            string dataPath = mbApiInterface.Setting_GetPersistentStoragePath();
-        }
+      }
+      catch (CUEException ex)
+      {
+        Debug.WriteLine("CUE Exception! ErrorCode: " + Enum.GetName(typeof(CorsairError), ex.Error));
+        return null;
+      }
 
-        // MusicBee is closing the plugin (plugin is being disabled by user or MusicBee is shutting down)
-        public void Close(PluginCloseReason reason)
-        {
-        }
+      _timer.Elapsed += TimerOnElapsed;
+      _timer.Interval = 15;
 
-        // uninstall this plugin - clean up any persisted files
-        public void Uninstall()
-        {
-        }
+      Debug.WriteLine(_about.Name + " loaded");
+      return _about;
+    }
 
-        // receive event notifications from MusicBee
-        // you need to set about.ReceiveNotificationFlags = PlayerEvents to receive all notifications, and not just the startup event
-        public void ReceiveNotification(string sourceFileUrl, NotificationType type)
-        {
-            // perform some action depending on the notification type
-            switch (type)
-            {
-                case NotificationType.PluginStartup:
-                    // perform startup initialisation
-                    switch (mbApiInterface.Player_GetPlayState())
-                    {
-                        case PlayState.Playing:
-                        case PlayState.Paused:
-                            // ...
-                            break;
-                    }
-                    break;
-                case NotificationType.TrackChanged:
-                    string artist = mbApiInterface.NowPlaying_GetFileTag(MetaDataType.Artist);
-                    // ...
-                    break;
-            }
-        }
+    private void ShowDebugPlot(object sender, EventArgs e)
+    {
+      _debugplot.Show();
+    }
 
-        // return an array of lyric or artwork provider names this plugin supports
-        // the providers will be iterated through one by one and passed to the RetrieveLyrics/ RetrieveArtwork function in order set by the user in the MusicBee Tags(2) preferences screen until a match is found
-        public string[] GetProviders()
-        {
-            return null;
-        }
+    public bool Configure(IntPtr panelHandle)
+    {
+      // save any persistent settings in a sub-folder of this path
+      string dataPath = _mbApiInterface.Setting_GetPersistentStoragePath();
 
-        // return lyrics for the requested artist/title from the requested provider
-        // only required if PluginType = LyricsRetrieval
-        // return null if no lyrics are found
-        public string RetrieveLyrics(string sourceFileUrl, string artist, string trackTitle, string album, bool synchronisedPreferred, string provider)
-        {
-            return null;
-        }
+      Debug.WriteLine(_about.Name + " Configure called");
+      _settings.Show();
+      // This prevents showing the About Box by MusicBee
+      return true;
+    }
 
-        // return Base64 string representation of the artwork binary data from the requested provider
-        // only required if PluginType = ArtworkRetrieval
-        // return null if no artwork is found
-        public string RetrieveArtwork(string sourceFileUrl, string albumArtist, string album, string provider)
+    // called by MusicBee when the user clicks Apply or Save in the MusicBee Preferences screen.
+    // its up to you to figure out whether anything has changed and needs updating
+    public void SaveSettings()
+    {
+      // save any persistent settings in a sub-folder of this path
+      string dataPath = _mbApiInterface.Setting_GetPersistentStoragePath();
+    }
+
+    // MusicBee is closing the plugin (plugin is being disabled by user or MusicBee is shutting down)
+    public void Close(PluginCloseReason reason)
+    {
+    }
+
+    // uninstall this plugin - clean up any persisted files
+    public void Uninstall()
+    {
+    }
+
+    // receive event notifications from MusicBee
+    // you need to set about.ReceiveNotificationFlags = PlayerEvents to receive all notifications, and not just the startup event
+    public void ReceiveNotification(string sourceFileUrl, NotificationType type)
+    {
+      // perform some action depending on the notification type
+      switch (type)
+      {
+        case NotificationType.PluginStartup:
+          break;
+        case NotificationType.TrackChanged:
+          break;
+        case NotificationType.PlayStateChanged:
+          switch (_mbApiInterface.Player_GetPlayState())
+          {
+            case PlayState.Playing:
+              _timer.Start();
+              _devcontroller.StartEffect();
+              break;
+            case PlayState.Stopped:
+              _devcontroller.StopEffect();
+              _timer.Stop();
+              break;
+            case PlayState.Paused:
+              _timer.Stop();
+              break;
+            case PlayState.Undefined:
+              break;
+            case PlayState.Loading:
+              break;
+            default:
+              throw new ArgumentOutOfRangeException();
+          }
+          break;
+        case NotificationType.TrackChanging:
+          break;
+        case NotificationType.AutoDjStarted:
+          break;
+        case NotificationType.AutoDjStopped:
+          break;
+        case NotificationType.VolumeMuteChanged:
+          break;
+        case NotificationType.VolumeLevelChanged:
+          break;
+        case NotificationType.NowPlayingListChanged:
+          break;
+        case NotificationType.NowPlayingListEnded:
+          break;
+        case NotificationType.NowPlayingArtworkReady:
+          break;
+        case NotificationType.NowPlayingLyricsReady:
+          break;
+        case NotificationType.TagsChanging:
+          break;
+        case NotificationType.TagsChanged:
+          break;
+        case NotificationType.RatingChanging:
+          break;
+        case NotificationType.RatingChanged:
+          break;
+        case NotificationType.PlayCountersChanged:
+          break;
+        case NotificationType.ScreenSaverActivating:
+          break;
+        case NotificationType.ShutdownStarted:
+          break;
+        case NotificationType.EmbedInPanel:
+          break;
+        case NotificationType.PlayerRepeatChanged:
+          break;
+        case NotificationType.PlayerShuffleChanged:
+          break;
+        case NotificationType.PlayerEqualiserOnOffChanged:
+          break;
+        case NotificationType.PlayerScrobbleChanged:
+          break;
+        case NotificationType.ReplayGainChanged:
+          break;
+        case NotificationType.FileDeleting:
+          break;
+        case NotificationType.FileDeleted:
+          break;
+        case NotificationType.ApplicationWindowChanged:
+          break;
+        case NotificationType.StopAfterCurrentChanged:
+          break;
+        case NotificationType.LibrarySwitched:
+          break;
+        case NotificationType.FileAddedToLibrary:
+          break;
+        case NotificationType.FileAddedToInbox:
+          break;
+        case NotificationType.SynchCompleted:
+          break;
+        case NotificationType.DownloadCompleted:
+          break;
+        case NotificationType.MusicBeeStarted:
+          break;
+      }
+    }
+
+    private void TimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
+    {
+      float[] bardata = CalcBarData(_barcount);
+      _devcontroller.Curbardata = bardata;
+      _debugplot.UpdatePlot(bardata);
+    }
+
+    private float[] CalcBarData(int barcount)
+    {
+      float[] bardata = new float[barcount];
+      float[] fftdata = new float[4096];
+      var ret = _mbApiInterface.NowPlaying_GetSpectrumData(fftdata);
+      int jumpwidth = (fftdata.Length/2) / barcount;
+      int bar = 0;
+
+      if (ret > 0)
+      {
+        for (int i = 0; i < fftdata.Length / 2; i += jumpwidth)
         {
-            //Return Convert.ToBase64String(artworkBinaryData)
-            return null;
+          float avg = 0;
+          for (int j = i; j < i + jumpwidth && j < fftdata.Length / 2; j++)
+          {
+            avg += fftdata[j];
+          }
+          avg /= jumpwidth;
+
+          if (bar < bardata.Length - 1)
+          {
+            //bardata[bar] = (float) Math.Sqrt(avg) * 1000f;
+            bardata[bar] = (float)Math.Sqrt(avg) * 10f;
+            //bardata[bar] = (float)Math.Sqrt(avg) * 15f * (1 + (float)Math.Sqrt((double)bar/ (double)_barcount) * 1.25f);
+            //bardata[bar] = (float)Math.Log10(1/(avg*avg)) * 10f;
+          }
+          bar++;
         }
-   }
+        //foreach (var bard in bardata)
+        //{
+        //  Debug.WriteLine(bard);
+        //}
+        bardata[0] *= 0.7f; 
+      }
+      return bardata;
+    }
+  }
 }
