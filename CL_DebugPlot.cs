@@ -1,53 +1,40 @@
 ﻿using System;
+using System.Linq;
 using System.Windows.Forms;
-using OxyPlot;
-using OxyPlot.Axes;
-using OxyPlot.Series;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace MusicBeePlugin
 {
   public partial class ClDebugPlot : Form
   {
-    private readonly PlotModel _model = new PlotModel { Title = "Debug Spectrograph" };
-    private readonly ColumnSeries _series = new ColumnSeries();
+    private readonly Series _series;
+    private float _max = 0;
 
     public ClDebugPlot()
     {
       InitializeComponent();
-      _model.Axes.Add(new CategoryAxis());
-      _model.Series.Add(_series);
-      plotView1.Model = _model;
+
+      this.chart1.Titles.Add("Debug Spectrograph");
+      _series = this.chart1.Series.Add("fftdata");
+
       FormClosing += CL_DebugPlot_FormClosing;
     }
 
     public void UpdatePlot(float[] data)
     {
-      float max = 0;
-
-      if (!Visible)
+      if (!Visible)return;
+      Invoke( new MethodInvoker(delegate
       {
-        return;
-      }
-
-      _series.Items.Clear();
-      foreach (float item in data)
-      {
-        if (item == 0) continue;
-        if (item > max) max = item;
-        _series.Items.Add(new ColumnItem(item));
-      }
-      foreach (Axis axis in _model.Axes)
-      {
-        if (axis.Position != AxisPosition.Bottom && axis.Maximum <= max)
+        _series.Points.Clear();
+        foreach (float item in data)
         {
-          axis.Maximum = max;
-          axis.Minimum = 0;
+          if (item == 0) continue;
+          if (item > _max) _max = item;
+          _series.Points.AddY(item);
         }
-      }
-
-      _model.InvalidatePlot(true);
-      plotView1.InvalidatePlot(true);
-      plotView1.Invalidate();
+        chart1.ChartAreas.First().AxisY.Maximum = _max;
+        chart1.Refresh();
+      }));
     }
 
     private void CL_DebugPlot_FormClosing(object sender, FormClosingEventArgs e)
