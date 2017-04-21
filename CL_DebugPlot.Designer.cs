@@ -1,7 +1,4 @@
-﻿using OxyPlot;
-using OxyPlot.WindowsForms;
-
-namespace MusicBeePlugin
+﻿namespace MusicBeePlugin
 {
   partial class ClDebugPlot
   {
@@ -31,24 +28,12 @@ namespace MusicBeePlugin
     /// </summary>
     private void InitializeComponent()
     {
-      this.plotView1 = new OxyPlot.WindowsForms.PlotView();
+      System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+      System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
       this.button1 = new System.Windows.Forms.Button();
+      this.chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
+      ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
       this.SuspendLayout();
-      // 
-      // plotView1
-      // 
-      this.plotView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-      this.plotView1.Location = new System.Drawing.Point(0, 0);
-      this.plotView1.Name = "plotView1";
-      this.plotView1.PanCursor = System.Windows.Forms.Cursors.Hand;
-      this.plotView1.Size = new System.Drawing.Size(604, 374);
-      this.plotView1.TabIndex = 0;
-      this.plotView1.Text = "plotView1";
-      this.plotView1.ZoomHorizontalCursor = System.Windows.Forms.Cursors.SizeWE;
-      this.plotView1.ZoomRectangleCursor = System.Windows.Forms.Cursors.SizeNWSE;
-      this.plotView1.ZoomVerticalCursor = System.Windows.Forms.Cursors.SizeNS;
       // 
       // button1
       // 
@@ -61,22 +46,42 @@ namespace MusicBeePlugin
       this.button1.UseVisualStyleBackColor = true;
       this.button1.Click += new System.EventHandler(this.button1_Click);
       // 
+      // chart1
+      // 
+      this.chart1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.chart1.BackColor = System.Drawing.Color.DarkGray;
+      chartArea1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
+      chartArea1.Name = "ChartArea1";
+      this.chart1.ChartAreas.Add(chartArea1);
+      this.chart1.Location = new System.Drawing.Point(0, 0);
+      this.chart1.Name = "chart1";
+      this.chart1.Palette = System.Windows.Forms.DataVisualization.Charting.ChartColorPalette.Bright;
+      series1.ChartArea = "ChartArea1";
+      series1.Name = "Series1";
+      this.chart1.Series.Add(series1);
+      this.chart1.Size = new System.Drawing.Size(604, 374);
+      this.chart1.TabIndex = 2;
+      this.chart1.Text = "chart1";
+      // 
       // ClDebugPlot
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.ClientSize = new System.Drawing.Size(604, 403);
+      this.Controls.Add(this.chart1);
       this.Controls.Add(this.button1);
-      this.Controls.Add(this.plotView1);
       this.Name = "ClDebugPlot";
+      this.ShowIcon = false;
       this.Text = "CL_DebugPlot";
+      ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();
       this.ResumeLayout(false);
 
     }
 
     #endregion
-
-    private PlotView plotView1;
     private System.Windows.Forms.Button button1;
+    private System.Windows.Forms.DataVisualization.Charting.Chart chart1;
   }
 }
