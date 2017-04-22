@@ -23,7 +23,7 @@ namespace MusicBeePlugin
       _about.PluginInfoVersion = PluginInfoVersion;
       _about.Name = "CorsairLED";
       _about.Description = "Adds Support for Corsair CUE Devices";
-      _about.Author = "Stefan Lengauer";
+      _about.Author = "derTyp";
       _about.TargetApplication = "";   // current only applies to artwork, lyrics or instant messenger name that appears in the provider drop down selector or target Instant Messenger
       _about.Type = PluginType.General;
       _about.VersionMajor = 0;  // your plugin version
@@ -41,7 +41,7 @@ namespace MusicBeePlugin
         _devcontroller.Init();
         if (_devcontroller.IsInitialized)
         {
-          _settings = new ClSettings(_devcontroller);
+          _settings = new ClSettings(_devcontroller, _mbApiInterface.Setting_GetPersistentStoragePath());
           _barcount = _devcontroller.GetDesiredBarCount();
         }
       }
@@ -65,11 +65,9 @@ namespace MusicBeePlugin
 
     public bool Configure(IntPtr panelHandle)
     {
-      // save any persistent settings in a sub-folder of this path
-      string dataPath = _mbApiInterface.Setting_GetPersistentStoragePath();
-
-      Debug.WriteLine(_about.Name + " Configure called");
+      Debug.WriteLine(_about.Name + " Configure called with path" + _mbApiInterface.Setting_GetPersistentStoragePath());
       _settings.Show();
+
       // This prevents showing the About Box by MusicBee
       return true;
     }
@@ -78,13 +76,13 @@ namespace MusicBeePlugin
     // its up to you to figure out whether anything has changed and needs updating
     public void SaveSettings()
     {
-      // save any persistent settings in a sub-folder of this path
-      string dataPath = _mbApiInterface.Setting_GetPersistentStoragePath();
+      _settings.PersistValues();
     }
 
     // MusicBee is closing the plugin (plugin is being disabled by user or MusicBee is shutting down)
     public void Close(PluginCloseReason reason)
     {
+      _devcontroller.UnInit();
     }
 
     // uninstall this plugin - clean up any persisted files
@@ -227,11 +225,7 @@ namespace MusicBeePlugin
           }
           bar++;
         }
-        //foreach (var bard in bardata)
-        //{
-        //  Debug.WriteLine(bard);
-        //}
-        bardata[0] *= 0.7f; 
+        bardata[0] *= 0.6f; 
       }
       return bardata;
     }
