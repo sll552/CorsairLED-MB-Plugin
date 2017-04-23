@@ -11,9 +11,9 @@ namespace MusicBeePlugin
     private MusicBeeApiInterface _mbApiInterface;
     private readonly PluginInfo _about = new PluginInfo();
     private ClSettings _settings;
-    private readonly ClDeviceController _devcontroller = new ClDeviceController();
+    private ClDeviceController _devcontroller;
     private readonly ClDebugPlot _debugplot = new ClDebugPlot();
-    private readonly Timer _timer = new Timer();
+    private readonly Timer _pauseTimer = new Timer();
     private int _barcount = 22;
 
     public PluginInfo Initialise(IntPtr apiInterfacePtr)
@@ -38,8 +38,9 @@ namespace MusicBeePlugin
 
       try
       {
+        _devcontroller = new ClDeviceController(this);
         _devcontroller.Init();
-        if (_devcontroller.IsInitialized)
+        if (ClDeviceController.IsInitialized)
         {
           _settings = new ClSettings(_devcontroller, _mbApiInterface.Setting_GetPersistentStoragePath());
           _barcount = _devcontroller.GetDesiredBarCount();
@@ -51,8 +52,9 @@ namespace MusicBeePlugin
         return null;
       }
 
-      _timer.Elapsed += TimerOnElapsed;
-      _timer.Interval = 15;
+      _pauseTimer.AutoReset = false;
+      _pauseTimer.Interval = 5000;
+      _pauseTimer.Elapsed += PauseTimerOnElapsed;
 
       Debug.WriteLine(_about.Name + " loaded");
       return _about;
@@ -82,7 +84,7 @@ namespace MusicBeePlugin
     // MusicBee is closing the plugin (plugin is being disabled by user or MusicBee is shutting down)
     public void Close(PluginCloseReason reason)
     {
-      _devcontroller.UnInit();
+      ClDeviceController.UnInit();
     }
 
     // uninstall this plugin - clean up any persisted files
@@ -98,6 +100,7 @@ namespace MusicBeePlugin
       switch (type)
       {
         case NotificationType.PluginStartup:
+          _pauseTimer.Start();
           break;
         case NotificationType.TrackChanged:
           break;
@@ -105,19 +108,20 @@ namespace MusicBeePlugin
           switch (_mbApiInterface.Player_GetPlayState())
           {
             case PlayState.Playing:
-              _timer.Start();
+              _pauseTimer.Stop();
               _devcontroller.StartEffect();
               break;
             case PlayState.Stopped:
               _devcontroller.StopEffect();
-              _timer.Stop();
               break;
             case PlayState.Paused:
-              _timer.Stop();
+              _pauseTimer.Start();
               break;
             case PlayState.Undefined:
+              _pauseTimer.Start();
               break;
             case PlayState.Loading:
+              _pauseTimer.Start();
               break;
             default:
               throw new ArgumentOutOfRangeException();
@@ -190,7 +194,12 @@ namespace MusicBeePlugin
       }
     }
 
-    private void TimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
+    private void PauseTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
+    {
+      _devcontroller.StopEffect();
+    }
+
+    public void UpdateSpectrographData()
     {
       float[] bardata = CalcBarData(_barcount);
       _devcontroller.Curbardata = bardata;

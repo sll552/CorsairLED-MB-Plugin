@@ -11,6 +11,7 @@ namespace MusicBeePlugin
     private readonly ClDeviceController _deviceController;
     private readonly ClSetting<Color> _effectSettingPrimaryColor = new ClSetting<Color>(new Color(), "ESprimColor");
     private readonly ClSetting<Color> _effectSettingBackgroundColor = new ClSetting<Color>(new Color(), "ESbackColor");
+    private readonly ClSetting<ClSpectrumBrushFactory.ColoringMode> _effectSettingColorMode = new ClSetting<ClSpectrumBrushFactory.ColoringMode>(ClSpectrumBrushFactory.ColoringMode.Solid, "EScolorMode");
     private readonly string _configFile;
 
     public Color EffectSettingPrimaryColor
@@ -22,6 +23,11 @@ namespace MusicBeePlugin
     {
       get => _effectSettingBackgroundColor.Value;
       private set => _effectSettingBackgroundColor.Value = value;
+    }
+    public ClSpectrumBrushFactory.ColoringMode EffectSettingColorMode
+    {
+      get => _effectSettingColorMode.Value;
+      private set => _effectSettingColorMode.Value = value;
     }
 
     public ClSettings(ClDeviceController dc, string configFileLocation)
@@ -37,13 +43,28 @@ namespace MusicBeePlugin
 
       InitializeComponent();
 
-      if (dc.IsInitialized)
+      if (ClDeviceController.IsInitialized)
       {
         UpdateValues();
+        OneTimeInit();
       }
 
       FormClosing += CL_Settings_FormClosing;
       Shown += CL_Settings_OnShown;
+    }
+
+    private void OneTimeInit()
+    {
+      colorModeComboBox.DataSource = Enum.GetValues(typeof(ClSpectrumBrushFactory.ColoringMode));
+      colorModeComboBox.SelectedIndexChanged += ColorModeComboBoxOnSelectedIndexChanged;
+      detectedKeyboardLabel.Text = _deviceController.GetKeyboardModel();
+    }
+
+    private void ColorModeComboBoxOnSelectedIndexChanged(object sender, EventArgs eventArgs)
+    {
+      ClSpectrumBrushFactory.ColoringMode tmp;
+      Enum.TryParse<ClSpectrumBrushFactory.ColoringMode>(colorModeComboBox.SelectedValue.ToString(), out tmp);
+      EffectSettingColorMode = tmp;
     }
 
     private void CL_Settings_OnShown(object sender, EventArgs eventArgs)
@@ -75,12 +96,15 @@ namespace MusicBeePlugin
         return appSettings[key]?.Value;
       }
 
-      detectedKeyboardLabel.Text = _deviceController.GetKeyboardModel();
-
       primaryColorPicker.BackColor = ColorTranslator.FromHtml(ReadKey(_effectSettingPrimaryColor.Key));
       EffectSettingPrimaryColor = primaryColorPicker.BackColor;
       backColorPicker.BackColor = ColorTranslator.FromHtml(ReadKey(_effectSettingBackgroundColor.Key));
       EffectSettingBackgroundColor = backColorPicker.BackColor;
+      ClSpectrumBrushFactory.ColoringMode tmp;
+      Enum.TryParse<ClSpectrumBrushFactory.ColoringMode>(ReadKey(_effectSettingColorMode.Key), out tmp);
+      EffectSettingColorMode = tmp;
+      colorModeComboBox.SelectedItem = EffectSettingColorMode;
+
 
     }
 
@@ -106,6 +130,8 @@ namespace MusicBeePlugin
 
       PersistKey(_effectSettingPrimaryColor.Key, ColorTranslator.ToHtml(EffectSettingPrimaryColor));
       PersistKey(_effectSettingBackgroundColor.Key, ColorTranslator.ToHtml(EffectSettingBackgroundColor));
+      PersistKey(_effectSettingColorMode.Key,
+        Enum.GetName(typeof(ClSpectrumBrushFactory.ColoringMode), EffectSettingColorMode));
 
     }
 

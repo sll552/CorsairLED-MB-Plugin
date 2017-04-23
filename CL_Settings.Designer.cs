@@ -38,6 +38,8 @@
       this.primaryColorPicker = new System.Windows.Forms.Button();
       this.label2 = new System.Windows.Forms.Label();
       this.colorDialog1 = new System.Windows.Forms.ColorDialog();
+      this.label4 = new System.Windows.Forms.Label();
+      this.colorModeComboBox = new System.Windows.Forms.ComboBox();
       this.groupBox1.SuspendLayout();
       this.groupBox2.SuspendLayout();
       this.SuspendLayout();
@@ -87,6 +89,8 @@
       // 
       // groupBox2
       // 
+      this.groupBox2.Controls.Add(this.colorModeComboBox);
+      this.groupBox2.Controls.Add(this.label4);
       this.groupBox2.Controls.Add(this.backColorPicker);
       this.groupBox2.Controls.Add(this.label3);
       this.groupBox2.Controls.Add(this.primaryColorPicker);
@@ -100,7 +104,7 @@
       // 
       // backColorPicker
       // 
-      this.backColorPicker.Location = new System.Drawing.Point(262, 15);
+      this.backColorPicker.Location = new System.Drawing.Point(265, 15);
       this.backColorPicker.Name = "backColorPicker";
       this.backColorPicker.Size = new System.Drawing.Size(40, 23);
       this.backColorPicker.TabIndex = 4;
@@ -111,7 +115,7 @@
       // 
       this.label3.AutoSize = true;
       this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-      this.label3.Location = new System.Drawing.Point(144, 20);
+      this.label3.Location = new System.Drawing.Point(147, 20);
       this.label3.Name = "label3";
       this.label3.Size = new System.Drawing.Size(112, 13);
       this.label3.TabIndex = 3;
@@ -119,7 +123,7 @@
       // 
       // primaryColorPicker
       // 
-      this.primaryColorPicker.Location = new System.Drawing.Point(98, 15);
+      this.primaryColorPicker.Location = new System.Drawing.Point(101, 15);
       this.primaryColorPicker.Name = "primaryColorPicker";
       this.primaryColorPicker.Size = new System.Drawing.Size(40, 23);
       this.primaryColorPicker.TabIndex = 2;
@@ -141,6 +145,26 @@
       this.colorDialog1.AnyColor = true;
       this.colorDialog1.Color = System.Drawing.Color.Red;
       this.colorDialog1.ShowHelp = true;
+      // 
+      // label4
+      // 
+      this.label4.AutoSize = true;
+      this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.label4.Location = new System.Drawing.Point(7, 47);
+      this.label4.Name = "label4";
+      this.label4.Size = new System.Drawing.Size(92, 13);
+      this.label4.TabIndex = 6;
+      this.label4.Text = "Coloring Mode:";
+      // 
+      // colorModeComboBox
+      // 
+      this.colorModeComboBox.BackColor = System.Drawing.SystemColors.ControlDark;
+      this.colorModeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+      this.colorModeComboBox.FormattingEnabled = true;
+      this.colorModeComboBox.Location = new System.Drawing.Point(101, 45);
+      this.colorModeComboBox.Name = "colorModeComboBox";
+      this.colorModeComboBox.Size = new System.Drawing.Size(121, 21);
+      this.colorModeComboBox.TabIndex = 7;
       // 
       // ClSettings
       // 
@@ -176,5 +200,7 @@
     private System.Windows.Forms.ColorDialog colorDialog1;
     private System.Windows.Forms.Button backColorPicker;
     private System.Windows.Forms.Label label3;
+    private System.Windows.Forms.Label label4;
+    private System.Windows.Forms.ComboBox colorModeComboBox;
   }
 }

@@ -4,8 +4,8 @@ using System.Drawing;
 using System.Linq;
 using CUE.NET;
 using CUE.NET.Brushes;
-using CUE.NET.Devices.Generic;
 using CUE.NET.Devices.Generic.Enums;
+using CUE.NET.Devices.Generic.EventArgs;
 using CUE.NET.Devices.Keyboard;
 using CUE.NET.Devices.Keyboard.Enums;
 using CUE.NET.Exceptions;
@@ -20,9 +20,20 @@ namespace MusicBeePlugin
     private float[] _curbardata;
     private ListLedGroup _spectrumGroup;
     private bool _firstinit = true;
+    private readonly Plugin _plugin;
+    private float _max = 1.2f;
+    private float _min = 0.0f;
+    private ClSpectrumBrushFactory _brushFactory;
+
+    public ClDeviceController(Plugin plugin)
+    {
+      _plugin = plugin;
+      _brushFactory = new ClSpectrumBrushFactory(this);
+    }
 
     public float[] Curbardata { get => IsInitialized ? _curbardata : null; set => _curbardata = value; }
-    public bool IsInitialized { get; private set; }
+
+    public static bool IsInitialized => CueSDK.IsInitialized;
 
     public void Init()
     {
@@ -39,10 +50,10 @@ namespace MusicBeePlugin
           CueSDK.Reinitialize(true);
         }
         CueSDK.UpdateMode = UpdateMode.Continuous;
-        CueSDK.UpdateFrequency = 1f / 60f;
+        CueSDK.UpdateFrequency = 1f / 30f;
         Debug.WriteLine("Initialized with " + CueSDK.LoadedArchitecture + "-SDK");
         _keyboard = CueSDK.KeyboardSDK;
-        IsInitialized = true;
+        _keyboard.Updated += KeyboardOnUpdated;
       }
       catch (CUEException e)
       {
@@ -51,11 +62,15 @@ namespace MusicBeePlugin
       }
     }
 
-    public void UnInit()
+    private void KeyboardOnUpdated(object sender, UpdatedEventArgs args)
+    {
+      _plugin.UpdateSpectrographData();
+    }
+
+    public static void UnInit()
     {
       if (!IsInitialized) return;
       CueSDK.Reinitialize(false);
-      IsInitialized = false;
     }
 
     public string GetKeyboardModel()
@@ -81,21 +96,42 @@ namespace MusicBeePlugin
         Init();
       }
       _keyboard.Brush = new SolidColorBrush(Color.Black);
-      _spectrumGroup = new ListLedGroup(_keyboard, _keyboard) {Brush = new ClSolidSpectrumBrush(Color.Red, this)};
+      _spectrumGroup = new ListLedGroup(_keyboard, _keyboard) {Brush = _brushFactory.GetSpectrumBrush(ClSpectrumBrushFactory.ColoringMode.Random,Color.Red)};
 
     }
 
     public void StopEffect()
     {
+      if (_keyboard == null || _spectrumGroup == null) return;
+
+      _keyboard.DetachLedGroup(_spectrumGroup);
+      _keyboard.Brush = null;
+      _keyboard.Update(true);
+      _spectrumGroup.RemoveLeds(_keyboard);
+      _spectrumGroup.Detach();
+      _spectrumGroup = null;
+
       if (IsInitialized)
       {
         UnInit();
       }
-      _keyboard.DetachLedGroup(_spectrumGroup);
-      _keyboard.Brush = null;
-      _spectrumGroup.RemoveLeds(_keyboard);
-      _spectrumGroup.Detach();
-      _spectrumGroup = null;
+    }
+
+    public bool IsInSpectrum(RectangleF rectangle, BrushRenderTarget renderTarget)
+    {
+      float[] bardata = Curbardata;
+      if (bardata == null) return false;
+
+      int barwidth = (int)Math.Floor(rectangle.Width / bardata.Length);
+      
+      for (int i = 0; i < bardata.Length; i++)
+      {
+        // make sure that  min > bardata > max
+        bardata[i] = Math.Min(Math.Max(bardata[i], _min), _max);
+      }
+
+      int baridx = (int)Math.Floor((renderTarget.Point.X - rectangle.Left) / barwidth);
+      return (_max - bardata[baridx]) / _max < renderTarget.Point.Y / rectangle.Height;
     }
   }
 }
