@@ -28,7 +28,7 @@ namespace MusicBeePlugin
         case ColoringMode.Solid:
           return new ClSolidSpectrumBrush(primColor, _controller);
         case ColoringMode.Gradient:
-          return new ClLinGradSpectrumBrush(new RainbowGradient(primColor.GetHue()),_controller);
+          return new ClLinGradSpectrumBrush(new RainbowGradient(primColor.GetHue(), primColor.GetHue() + 360f),_controller);
         case ColoringMode.Random:
           return new ClRandSpectrumBrush(_controller);
         default:

@@ -152,6 +152,18 @@ namespace MusicBeePlugin
         backColorPicker.BackColor = colorDialog1.Color;
       }
     }
+
+    public void Delete()
+    {
+      if (File.Exists(_configFile))
+      {
+        File.Delete(_configFile);
+      }
+      if (Path.GetDirectoryName(_configFile) != null && Directory.Exists(Path.GetDirectoryName(_configFile)))
+      {
+        Directory.Delete(Path.GetDirectoryName(_configFile));
+      }
+    }
   }
 
   internal class ClSetting<TValue>

@@ -34,15 +34,15 @@ namespace MusicBeePlugin
       _about.ReceiveNotifications = (ReceiveNotificationFlags.PlayerEvents | ReceiveNotificationFlags.TagEvents);
       _about.ConfigurationPanelHeight = 0;   // height in pixels that musicbee should reserve in a panel for config settings. When set, a handle to an empty panel will be passed to the Configure function
 
-      _mbApiInterface.MB_AddMenuItem("mnuTools/CL_Show Debug Plot", "HotKey For CL Debug Plot", ShowDebugPlot);
-
       try
       {
         _devcontroller = new ClDeviceController(this);
         _devcontroller.Init();
         if (ClDeviceController.IsInitialized)
         {
+          _mbApiInterface.MB_AddMenuItem("mnuTools/CL_Show Debug Plot", "HotKey For CL Debug Plot", ShowDebugPlot);
           _settings = new ClSettings(_devcontroller, _mbApiInterface.Setting_GetPersistentStoragePath());
+          _devcontroller.AddSettings(_settings);
           _barcount = _devcontroller.GetDesiredBarCount();
         }
       }
@@ -90,6 +90,7 @@ namespace MusicBeePlugin
     // uninstall this plugin - clean up any persisted files
     public void Uninstall()
     {
+      _settings.Delete();
     }
 
     // receive event notifications from MusicBee

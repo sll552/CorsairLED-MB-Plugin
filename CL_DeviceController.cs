@@ -23,7 +23,8 @@ namespace MusicBeePlugin
     private readonly Plugin _plugin;
     private float _max = 1.2f;
     private float _min = 0.0f;
-    private ClSpectrumBrushFactory _brushFactory;
+    private readonly ClSpectrumBrushFactory _brushFactory;
+    private ClSettings _settings;
 
     public ClDeviceController(Plugin plugin)
     {
@@ -31,13 +32,18 @@ namespace MusicBeePlugin
       _brushFactory = new ClSpectrumBrushFactory(this);
     }
 
-    public float[] Curbardata { get => IsInitialized ? _curbardata : null; set => _curbardata = value; }
+    public float[] Curbardata
+    {
+      private get => IsInitialized ? _curbardata : null;
+      set => _curbardata = value;
+    }
 
     public static bool IsInitialized => CueSDK.IsInitialized;
 
     public void Init()
     {
       if (IsInitialized) return;
+      if (!CueSDK.IsSDKAvailable(null)) return;
       try
       {
         if (_firstinit)
@@ -95,15 +101,20 @@ namespace MusicBeePlugin
       {
         Init();
       }
-      _keyboard.Brush = new SolidColorBrush(Color.Black);
-      _spectrumGroup = new ListLedGroup(_keyboard, _keyboard) {Brush = _brushFactory.GetSpectrumBrush(ClSpectrumBrushFactory.ColoringMode.Random,Color.Red)};
-
+      _keyboard.Brush = new SolidColorBrush(_settings?.EffectSettingBackgroundColor ?? Color.Black);
+      _spectrumGroup = new ListLedGroup(_keyboard, _keyboard)
+      {
+        Brush = _brushFactory.GetSpectrumBrush(
+          _settings?.EffectSettingColorMode ?? ClSpectrumBrushFactory.ColoringMode.Solid,
+          _settings?.EffectSettingPrimaryColor ?? Color.Red)
+      };
     }
 
     public void StopEffect()
     {
       if (_keyboard == null || _spectrumGroup == null) return;
-
+      _spectrumGroup.Brush = new SolidColorBrush(Color.Black);
+      _keyboard.Update();
       _keyboard.DetachLedGroup(_spectrumGroup);
       _keyboard.Brush = null;
       _keyboard.Update(true);
@@ -122,16 +133,21 @@ namespace MusicBeePlugin
       float[] bardata = Curbardata;
       if (bardata == null) return false;
 
-      int barwidth = (int)Math.Floor(rectangle.Width / bardata.Length);
-      
+      int barwidth = (int) Math.Floor(rectangle.Width / bardata.Length);
+
       for (int i = 0; i < bardata.Length; i++)
       {
         // make sure that  min > bardata > max
         bardata[i] = Math.Min(Math.Max(bardata[i], _min), _max);
       }
 
-      int baridx = (int)Math.Floor((renderTarget.Point.X - rectangle.Left) / barwidth);
+      int baridx = (int) Math.Floor((renderTarget.Point.X - rectangle.Left) / barwidth);
       return (_max - bardata[baridx]) / _max < renderTarget.Point.Y / rectangle.Height;
+    }
+
+    public void AddSettings(ClSettings settings)
+    {
+      _settings = settings;
     }
   }
 }
