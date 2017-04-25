@@ -23,7 +23,7 @@ namespace MusicBeePlugin
       _about.PluginInfoVersion = PluginInfoVersion;
       _about.Name = "CorsairLED";
       _about.Description = "Adds Support for Corsair CUE Devices";
-      _about.Author = "derTyp";
+      _about.Author = "Stefan Lengauer";
       _about.TargetApplication = "";   // current only applies to artwork, lyrics or instant messenger name that appears in the provider drop down selector or target Instant Messenger
       _about.Type = PluginType.General;
       _about.VersionMajor = 0;  // your plugin version
@@ -41,7 +41,7 @@ namespace MusicBeePlugin
         if (ClDeviceController.IsInitialized)
         {
           _mbApiInterface.MB_AddMenuItem("mnuTools/CL_Show Debug Plot", "HotKey For CL Debug Plot", ShowDebugPlot);
-          _settings = new ClSettings(_devcontroller, _mbApiInterface.Setting_GetPersistentStoragePath());
+          _settings = new ClSettings(_about, _devcontroller, _mbApiInterface.Setting_GetPersistentStoragePath());
           _devcontroller.AddSettings(_settings);
           _barcount = _devcontroller.GetDesiredBarCount();
         }

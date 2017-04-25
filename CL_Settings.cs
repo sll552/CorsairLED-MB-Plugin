@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
@@ -12,7 +13,9 @@ namespace MusicBeePlugin
     private readonly ClSetting<Color> _effectSettingPrimaryColor = new ClSetting<Color>(new Color(), "ESprimColor");
     private readonly ClSetting<Color> _effectSettingBackgroundColor = new ClSetting<Color>(new Color(), "ESbackColor");
     private readonly ClSetting<ClSpectrumBrushFactory.ColoringMode> _effectSettingColorMode = new ClSetting<ClSpectrumBrushFactory.ColoringMode>(ClSpectrumBrushFactory.ColoringMode.Solid, "EScolorMode");
+    private readonly ClSetting<bool> _effectSettingLightbarProgress = new ClSetting<bool>(false, "ESlbProg");
     private readonly string _configFile;
+    private readonly Plugin.PluginInfo _about;
 
     public Color EffectSettingPrimaryColor
     {
@@ -29,10 +32,16 @@ namespace MusicBeePlugin
       get => _effectSettingColorMode.Value;
       private set => _effectSettingColorMode.Value = value;
     }
+    public bool EffectSettingLightbarProgress
+    {
+      get => _effectSettingLightbarProgress.Value;
+      private set => _effectSettingLightbarProgress.Value = value;
+    }
 
-    public ClSettings(ClDeviceController dc, string configFileLocation)
+    public ClSettings(Plugin.PluginInfo about, ClDeviceController dc, string configFileLocation)
     {
       _deviceController = dc ?? throw new ArgumentNullException(nameof(dc));
+      _about = about ?? throw new ArgumentNullException(nameof(about));
       string configFileDir = Path.GetFullPath(configFileLocation ?? throw new ArgumentNullException(nameof(configFileLocation))) + "\\CorsairLED";
 
       if (!Directory.Exists(configFileDir))
@@ -58,6 +67,12 @@ namespace MusicBeePlugin
       colorModeComboBox.DataSource = Enum.GetValues(typeof(ClSpectrumBrushFactory.ColoringMode));
       colorModeComboBox.SelectedIndexChanged += ColorModeComboBoxOnSelectedIndexChanged;
       detectedKeyboardLabel.Text = _deviceController.GetKeyboardModel();
+      lightbarProgCheckBox.CheckStateChanged += LightbarProgCheckBoxOnCheckStateChanged;
+    }
+
+    private void LightbarProgCheckBoxOnCheckStateChanged(object sender, EventArgs eventArgs)
+    {
+      EffectSettingLightbarProgress = lightbarProgCheckBox.Checked;
     }
 
     private void ColorModeComboBoxOnSelectedIndexChanged(object sender, EventArgs eventArgs)
@@ -100,11 +115,15 @@ namespace MusicBeePlugin
       EffectSettingPrimaryColor = primaryColorPicker.BackColor;
       backColorPicker.BackColor = ColorTranslator.FromHtml(ReadKey(_effectSettingBackgroundColor.Key));
       EffectSettingBackgroundColor = backColorPicker.BackColor;
-      ClSpectrumBrushFactory.ColoringMode tmp;
-      Enum.TryParse<ClSpectrumBrushFactory.ColoringMode>(ReadKey(_effectSettingColorMode.Key), out tmp);
-      EffectSettingColorMode = tmp;
+
+      ClSpectrumBrushFactory.ColoringMode tmpColoringMode;
+      Enum.TryParse<ClSpectrumBrushFactory.ColoringMode>(ReadKey(_effectSettingColorMode.Key), out tmpColoringMode);
+      EffectSettingColorMode = tmpColoringMode;
       colorModeComboBox.SelectedItem = EffectSettingColorMode;
 
+      bool tmpLightbarProg;
+      EffectSettingLightbarProgress = Boolean.TryParse(ReadKey(_effectSettingLightbarProgress.Key), out tmpLightbarProg);
+      lightbarProgCheckBox.Checked = tmpLightbarProg;
 
     }
 
@@ -132,6 +151,7 @@ namespace MusicBeePlugin
       PersistKey(_effectSettingBackgroundColor.Key, ColorTranslator.ToHtml(EffectSettingBackgroundColor));
       PersistKey(_effectSettingColorMode.Key,
         Enum.GetName(typeof(ClSpectrumBrushFactory.ColoringMode), EffectSettingColorMode));
+      PersistKey(_effectSettingLightbarProgress.Key, EffectSettingLightbarProgress.ToString());
 
     }
 
@@ -163,6 +183,14 @@ namespace MusicBeePlugin
       {
         Directory.Delete(Path.GetDirectoryName(_configFile));
       }
+    }
+
+    private void aboutButton_Click(object sender, EventArgs e)
+    {
+      Debug.Assert(_about != null, "_about != null");
+      MessageBox.Show(this,
+        _about.Name + " v" + _about.VersionMajor + "." + _about.VersionMinor + "." + _about.Revision + "\nAuthor: " +
+        _about.Author, "About CorsairLED", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
   }
 
