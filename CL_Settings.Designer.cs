@@ -42,6 +42,7 @@
       this.label2 = new System.Windows.Forms.Label();
       this.colorDialog1 = new System.Windows.Forms.ColorDialog();
       this.aboutButton = new System.Windows.Forms.Button();
+      this.messageLabel = new System.Windows.Forms.Label();
       this.groupBox1.SuspendLayout();
       this.groupBox2.SuspendLayout();
       this.SuspendLayout();
@@ -190,16 +191,26 @@
       this.aboutButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
       this.aboutButton.Location = new System.Drawing.Point(13, 176);
       this.aboutButton.Name = "aboutButton";
-      this.aboutButton.Size = new System.Drawing.Size(104, 28);
+      this.aboutButton.Size = new System.Drawing.Size(48, 28);
       this.aboutButton.TabIndex = 4;
       this.aboutButton.Text = "About";
       this.aboutButton.UseVisualStyleBackColor = true;
       this.aboutButton.Click += new System.EventHandler(this.aboutButton_Click);
       // 
+      // messageLabel
+      // 
+      this.messageLabel.AutoSize = true;
+      this.messageLabel.Location = new System.Drawing.Point(70, 184);
+      this.messageLabel.Name = "messageLabel";
+      this.messageLabel.Size = new System.Drawing.Size(0, 13);
+      this.messageLabel.TabIndex = 5;
+      this.messageLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+      // 
       // ClSettings
       // 
       this.BackColor = System.Drawing.SystemColors.ControlDarkDark;
       this.ClientSize = new System.Drawing.Size(341, 216);
+      this.Controls.Add(this.messageLabel);
       this.Controls.Add(this.aboutButton);
       this.Controls.Add(this.groupBox2);
       this.Controls.Add(this.saveCloseButton);
@@ -216,6 +227,7 @@
       this.groupBox2.ResumeLayout(false);
       this.groupBox2.PerformLayout();
       this.ResumeLayout(false);
+      this.PerformLayout();
 
     }
 
@@ -235,5 +247,6 @@
     private System.Windows.Forms.ComboBox colorModeComboBox;
     private System.Windows.Forms.CheckBox lightbarProgCheckBox;
     private System.Windows.Forms.Button aboutButton;
+    private System.Windows.Forms.Label messageLabel;
   }
 }

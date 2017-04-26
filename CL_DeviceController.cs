@@ -25,6 +25,7 @@ namespace MusicBeePlugin
     private float _min = 0.0f;
     private readonly ClSpectrumBrushFactory _brushFactory;
     private ClSettings _settings;
+    private bool _initAble = true;
 
     public ClDeviceController(Plugin plugin)
     {
@@ -40,13 +41,23 @@ namespace MusicBeePlugin
 
     public static bool IsInitialized => CueSDK.IsInitialized;
 
-    public void Init()
+    public void Init(bool force=false)
     {
-      if (IsInitialized) return;
-      if (!CueSDK.IsSDKAvailable(null)) return;
+      if (!CueSDK.IsSDKAvailable(null))
+      {
+        if (!_initAble)
+        {
+          _settings.SetMessage("No SDK available");
+        }
+        _initAble = false;
+        return;
+      }
+
+      if (IsInitialized && !force) return;
+
       try
       {
-        if (_firstinit)
+        if (_firstinit || force)
         {
           CueSDK.Initialize(true);
           _firstinit = false;
@@ -101,6 +112,12 @@ namespace MusicBeePlugin
       {
         Init();
       }
+      if (_keyboard == null)
+      {
+        Init(force:true);  
+      }
+      if (_keyboard == null) return;
+
       _keyboard.Brush = new SolidColorBrush(_settings?.EffectSettingBackgroundColor ?? Color.Black);
       _spectrumGroup = new ListLedGroup(_keyboard, _keyboard)
       {

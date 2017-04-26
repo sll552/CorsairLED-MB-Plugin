@@ -192,6 +192,11 @@ namespace MusicBeePlugin
         _about.Name + " v" + _about.VersionMajor + "." + _about.VersionMinor + "." + _about.Revision + "\nAuthor: " +
         _about.Author, "About CorsairLED", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
+
+    public void SetMessage(string msg)
+    {
+      messageLabel.Text = msg;
+    }
   }
 
   internal class ClSetting<TValue>

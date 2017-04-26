@@ -49,8 +49,9 @@ namespace MusicBeePlugin
       catch (CUEException ex)
       {
         Debug.WriteLine("CUE Exception! ErrorCode: " + Enum.GetName(typeof(CorsairError), ex.Error));
-        return null;
+        throw;
       }
+      if (!ClDeviceController.IsInitialized) return null;
 
       _pauseTimer.AutoReset = false;
       _pauseTimer.Interval = 5000;
@@ -113,14 +114,8 @@ namespace MusicBeePlugin
               _devcontroller.StartEffect();
               break;
             case PlayState.Stopped:
-              _devcontroller.StopEffect();
-              break;
             case PlayState.Paused:
-              _pauseTimer.Start();
-              break;
             case PlayState.Undefined:
-              _pauseTimer.Start();
-              break;
             case PlayState.Loading:
               _pauseTimer.Start();
               break;
