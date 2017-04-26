@@ -47,7 +47,7 @@ namespace MusicBeePlugin
       {
         if (!_initAble)
         {
-          _settings.SetMessage("No SDK available");
+          _settings?.SetMessage("No SDK available");
         }
         _initAble = false;
         return;

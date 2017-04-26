@@ -38,10 +38,10 @@ namespace MusicBeePlugin
       {
         _devcontroller = new ClDeviceController(this);
         _devcontroller.Init();
+        _settings = new ClSettings(_about, _devcontroller, _mbApiInterface.Setting_GetPersistentStoragePath());
         if (ClDeviceController.IsInitialized)
         {
           _mbApiInterface.MB_AddMenuItem("mnuTools/CL_Show Debug Plot", "HotKey For CL Debug Plot", ShowDebugPlot);
-          _settings = new ClSettings(_about, _devcontroller, _mbApiInterface.Setting_GetPersistentStoragePath());
           _devcontroller.AddSettings(_settings);
           _barcount = _devcontroller.GetDesiredBarCount();
         }
@@ -49,6 +49,7 @@ namespace MusicBeePlugin
       catch (CUEException ex)
       {
         Debug.WriteLine("CUE Exception! ErrorCode: " + Enum.GetName(typeof(CorsairError), ex.Error));
+        Console.WriteLine("CUE Exception! ErrorCode: " + Enum.GetName(typeof(CorsairError), ex.Error));
         throw;
       }
       if (!ClDeviceController.IsInitialized) return null;
@@ -63,13 +64,13 @@ namespace MusicBeePlugin
 
     private void ShowDebugPlot(object sender, EventArgs e)
     {
-      _debugplot.Show();
+      _debugplot?.Show();
     }
 
     public bool Configure(IntPtr panelHandle)
     {
       Debug.WriteLine(_about.Name + " Configure called with path" + _mbApiInterface.Setting_GetPersistentStoragePath());
-      _settings.Show();
+      _settings?.Show();
 
       // This prevents showing the About Box by MusicBee
       return true;
@@ -79,7 +80,7 @@ namespace MusicBeePlugin
     // its up to you to figure out whether anything has changed and needs updating
     public void SaveSettings()
     {
-      _settings.PersistValues();
+      _settings?.PersistValues();
     }
 
     // MusicBee is closing the plugin (plugin is being disabled by user or MusicBee is shutting down)
@@ -91,7 +92,7 @@ namespace MusicBeePlugin
     // uninstall this plugin - clean up any persisted files
     public void Uninstall()
     {
-      _settings.Delete();
+      _settings?.Delete();
     }
 
     // receive event notifications from MusicBee
@@ -199,7 +200,7 @@ namespace MusicBeePlugin
     {
       float[] bardata = CalcBarData(_barcount);
       _devcontroller.Curbardata = bardata;
-      _debugplot.UpdatePlot(bardata);
+      _debugplot?.UpdatePlot(bardata);
     }
 
     private float[] CalcBarData(int barcount)
