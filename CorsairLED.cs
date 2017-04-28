@@ -48,7 +48,6 @@ namespace MusicBeePlugin
       }
       catch (CUEException ex)
       {
-        Debug.WriteLine("CUE Exception! ErrorCode: " + Enum.GetName(typeof(CorsairError), ex.Error));
         Console.WriteLine("CUE Exception! ErrorCode: " + Enum.GetName(typeof(CorsairError), ex.Error));
         throw;
       }
@@ -86,7 +85,7 @@ namespace MusicBeePlugin
     // MusicBee is closing the plugin (plugin is being disabled by user or MusicBee is shutting down)
     public void Close(PluginCloseReason reason)
     {
-      ClDeviceController.UnInit();
+      _devcontroller.StopEffect();
     }
 
     // uninstall this plugin - clean up any persisted files
@@ -200,6 +199,7 @@ namespace MusicBeePlugin
     {
       float[] bardata = CalcBarData(_barcount);
       _devcontroller.Curbardata = bardata;
+      _devcontroller.TrackProgress = _mbApiInterface.Player_GetPosition() * 1.0f / _mbApiInterface.NowPlaying_GetDuration();
       _debugplot?.UpdatePlot(bardata);
     }
 

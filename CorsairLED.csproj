@@ -77,8 +77,8 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CUE.NET, Version=1.1.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\CUE.NET.1.1.3.0\lib\net45\CUE.NET.dll</HintPath>
+    <Reference Include="CUE.NET, Version=1.1.3.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\CUE.NET.1.1.3.1\lib\net45\CUE.NET.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -90,6 +90,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CL_LinGradSpectrumBrush.cs" />
+    <Compile Include="CL_ProgressBrush.cs" />
     <Compile Include="CL_RandSpectrumBrush.cs" />
     <Compile Include="CL_SolidSpectrumBrush.cs" />
     <Compile Include="CL_DebugPlot.cs">
@@ -155,12 +156,12 @@
   <PropertyGroup>
     <PostBuildEvent>copy /Y "$(TargetDir)*.*" "C:\Program Files (x86)\MusicBee\Plugins\"</PostBuildEvent>
   </PropertyGroup>
-  <Import Project="packages\CUE.NET.1.1.3.0\build\net45\CUE.NET.targets" Condition="Exists('packages\CUE.NET.1.1.3.0\build\net45\CUE.NET.targets')" />
+  <Import Project="packages\CUE.NET.1.1.3.1\build\net45\CUE.NET.targets" Condition="Exists('packages\CUE.NET.1.1.3.1\build\net45\CUE.NET.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
-      <ErrorText>Dieses Projekt verweist auf mindestens ein NuGet-Paket, das auf diesem Computer fehlt. Verwenden Sie die Wiederherstellung von NuGet-Paketen, um die fehlenden Dateien herunterzuladen. Weitere Informationen finden Sie unter "http://go.microsoft.com/fwlink/?LinkID=322105". Die fehlende Datei ist "{0}".</ErrorText>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('packages\CUE.NET.1.1.3.0\build\net45\CUE.NET.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\CUE.NET.1.1.3.0\build\net45\CUE.NET.targets'))" />
+    <Error Condition="!Exists('packages\CUE.NET.1.1.3.1\build\net45\CUE.NET.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\CUE.NET.1.1.3.1\build\net45\CUE.NET.targets'))" />
   </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
