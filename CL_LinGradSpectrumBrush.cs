@@ -1,15 +1,16 @@
-﻿using System;
+using System;
 using System.Drawing;
 using CUE.NET.Brushes;
 using CUE.NET.Devices.Generic;
+using CUE.NET.Gradients;
 
 namespace MusicBeePlugin
 {
-  class ClSolidSpectrumBrush : SolidColorBrush
+  class ClLinGradSpectrumBrush : LinearGradientBrush
   {
     private readonly ClDeviceController _controller;
 
-    public ClSolidSpectrumBrush(CorsairColor color, ClDeviceController controller) : base (color)
+    public ClLinGradSpectrumBrush(IGradient gradient, ClDeviceController controller) : base (gradient)
     {
       _controller = controller ?? throw new ArgumentNullException(nameof(controller));
     }

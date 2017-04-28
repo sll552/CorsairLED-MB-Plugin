@@ -11,9 +11,9 @@ namespace MusicBeePlugin
     private MusicBeeApiInterface _mbApiInterface;
     private readonly PluginInfo _about = new PluginInfo();
     private ClSettings _settings;
-    private readonly ClDeviceController _devcontroller = new ClDeviceController();
+    private ClDeviceController _devcontroller;
     private readonly ClDebugPlot _debugplot = new ClDebugPlot();
-    private readonly Timer _timer = new Timer();
+    private readonly Timer _pauseTimer = new Timer();
     private int _barcount = 22;
 
     public PluginInfo Initialise(IntPtr apiInterfacePtr)
@@ -34,25 +34,28 @@ namespace MusicBeePlugin
       _about.ReceiveNotifications = (ReceiveNotificationFlags.PlayerEvents | ReceiveNotificationFlags.TagEvents);
       _about.ConfigurationPanelHeight = 0;   // height in pixels that musicbee should reserve in a panel for config settings. When set, a handle to an empty panel will be passed to the Configure function
 
-      _mbApiInterface.MB_AddMenuItem("mnuTools/CL_Show Debug Plot", "HotKey For CL Debug Plot", ShowDebugPlot);
-
       try
       {
+        _devcontroller = new ClDeviceController(this);
         _devcontroller.Init();
-        if (_devcontroller.IsInitialized)
+        _settings = new ClSettings(_about, _devcontroller, _mbApiInterface.Setting_GetPersistentStoragePath());
+        if (ClDeviceController.IsInitialized)
         {
-          _settings = new ClSettings(_devcontroller);
+          _mbApiInterface.MB_AddMenuItem("mnuTools/CL_Show Debug Plot", "HotKey For CL Debug Plot", ShowDebugPlot);
+          _devcontroller.AddSettings(_settings);
           _barcount = _devcontroller.GetDesiredBarCount();
         }
       }
       catch (CUEException ex)
       {
-        Debug.WriteLine("CUE Exception! ErrorCode: " + Enum.GetName(typeof(CorsairError), ex.Error));
-        return null;
+        Console.WriteLine("CUE Exception! ErrorCode: " + Enum.GetName(typeof(CorsairError), ex.Error));
+        throw;
       }
+      if (!ClDeviceController.IsInitialized) return null;
 
-      _timer.Elapsed += TimerOnElapsed;
-      _timer.Interval = 15;
+      _pauseTimer.AutoReset = false;
+      _pauseTimer.Interval = 5000;
+      _pauseTimer.Elapsed += PauseTimerOnElapsed;
 
       Debug.WriteLine(_about.Name + " loaded");
       return _about;
@@ -60,16 +63,14 @@ namespace MusicBeePlugin
 
     private void ShowDebugPlot(object sender, EventArgs e)
     {
-      _debugplot.Show();
+      _debugplot?.Show();
     }
 
     public bool Configure(IntPtr panelHandle)
     {
-      // save any persistent settings in a sub-folder of this path
-      string dataPath = _mbApiInterface.Setting_GetPersistentStoragePath();
+      Debug.WriteLine(_about.Name + " Configure called with path" + _mbApiInterface.Setting_GetPersistentStoragePath());
+      _settings?.Show();
 
-      Debug.WriteLine(_about.Name + " Configure called");
-      _settings.Show();
       // This prevents showing the About Box by MusicBee
       return true;
     }
@@ -78,18 +79,19 @@ namespace MusicBeePlugin
     // its up to you to figure out whether anything has changed and needs updating
     public void SaveSettings()
     {
-      // save any persistent settings in a sub-folder of this path
-      string dataPath = _mbApiInterface.Setting_GetPersistentStoragePath();
+      _settings?.PersistValues();
     }
 
     // MusicBee is closing the plugin (plugin is being disabled by user or MusicBee is shutting down)
     public void Close(PluginCloseReason reason)
     {
+      _devcontroller.StopEffect();
     }
 
     // uninstall this plugin - clean up any persisted files
     public void Uninstall()
     {
+      _settings?.Delete();
     }
 
     // receive event notifications from MusicBee
@@ -100,6 +102,7 @@ namespace MusicBeePlugin
       switch (type)
       {
         case NotificationType.PluginStartup:
+          _pauseTimer.Start();
           break;
         case NotificationType.TrackChanged:
           break;
@@ -107,19 +110,14 @@ namespace MusicBeePlugin
           switch (_mbApiInterface.Player_GetPlayState())
           {
             case PlayState.Playing:
-              _timer.Start();
+              _pauseTimer.Stop();
               _devcontroller.StartEffect();
               break;
             case PlayState.Stopped:
-              _devcontroller.StopEffect();
-              _timer.Stop();
-              break;
             case PlayState.Paused:
-              _timer.Stop();
-              break;
             case PlayState.Undefined:
-              break;
             case PlayState.Loading:
+              _pauseTimer.Start();
               break;
             default:
               throw new ArgumentOutOfRangeException();
@@ -192,11 +190,17 @@ namespace MusicBeePlugin
       }
     }
 
-    private void TimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
+    private void PauseTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs)
+    {
+      _devcontroller.StopEffect();
+    }
+
+    public void UpdateSpectrographData()
     {
       float[] bardata = CalcBarData(_barcount);
       _devcontroller.Curbardata = bardata;
-      _debugplot.UpdatePlot(bardata);
+      _devcontroller.TrackProgress = _mbApiInterface.Player_GetPosition() * 1.0f / _mbApiInterface.NowPlaying_GetDuration();
+      _debugplot?.UpdatePlot(bardata);
     }
 
     private float[] CalcBarData(int barcount)
@@ -227,11 +231,7 @@ namespace MusicBeePlugin
           }
           bar++;
         }
-        //foreach (var bard in bardata)
-        //{
-        //  Debug.WriteLine(bard);
-        //}
-        bardata[0] *= 0.7f; 
+        bardata[0] *= 0.6f; 
       }
       return bardata;
     }
