@@ -3,6 +3,7 @@ using System.Configuration;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Text;
 using System.Windows.Forms;
 
 namespace MusicBeePlugin
@@ -122,7 +123,8 @@ namespace MusicBeePlugin
       colorModeComboBox.SelectedItem = EffectSettingColorMode;
 
       bool tmpLightbarProg;
-      EffectSettingLightbarProgress = Boolean.TryParse(ReadKey(_effectSettingLightbarProgress.Key), out tmpLightbarProg);
+      Boolean.TryParse(ReadKey(_effectSettingLightbarProgress.Key), out tmpLightbarProg);
+      EffectSettingLightbarProgress = tmpLightbarProg;
       lightbarProgCheckBox.Checked = tmpLightbarProg;
 
     }
