@@ -1,5 +1,5 @@
 # Corsair LED MusicBee Plugin
-This Repo contains the CorsairLED Musicbee Plugin. The Plugin aims to provide support for spectrograph visualisation on Corsair RGB LED Devices using the CUE SDK.
+This Repo contains the CorsairLED Musicbee Plugin. The Plugin aims to provide support for spectrogram visualization on Corsair RGB LED Devices using the CUE SDK.
 
 ## Supported Devices
 All Corsair CUE enabled Keyboards, tested only with K95 Platinum
@@ -15,6 +15,7 @@ All Corsair CUE enabled Keyboards, tested only with K95 Platinum
 Download the latest release .zip and extract it into your Plugin folder (usually C:\Program Files (x86)\MusicBee\Plugins). It should get loaded by MusicBee automatically.
 
 ## Plugin Settings
+![Settings](https://i.imgur.com/OUldnr6.png)
 * **Primary Color:** The color used for the effect/animated LEDs 
 * **Background Color:** The color used for all other Keys
 * **Coloring Mode:** Coloring effect for the animated LEDs currently:
