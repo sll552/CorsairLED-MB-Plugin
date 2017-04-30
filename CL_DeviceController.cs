@@ -31,7 +31,8 @@ namespace MusicBeePlugin
     private ClProgressBrush _progressBrush;
     private ClSettings _settings;
     private bool _initAble = true;
-    private CorsairLedId[] _lightbarLeds = new CorsairLedId []
+
+    private readonly CorsairLedId[] _lightbarLeds = new CorsairLedId[]
     {
       CorsairLedId.Lightbar1,
       CorsairLedId.Lightbar2,
@@ -53,7 +54,7 @@ namespace MusicBeePlugin
       CorsairLedId.Lightbar18,
       CorsairLedId.Lightbar19
     };
-    
+
     public static bool IsInitialized => CueSDK.IsInitialized;
     public float TrackProgress { get; set; }
 
@@ -61,8 +62,10 @@ namespace MusicBeePlugin
     {
       _plugin = plugin;
       _brushFactory = new ClSpectrumBrushFactory(this);
-      CueSDK.PossibleX64NativePaths.Add(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\x64\CUESDK_2015.dll");
-      CueSDK.PossibleX86NativePaths.Add(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\x86\CUESDK_2015.dll");
+      CueSDK.PossibleX64NativePaths.Add(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) +
+                                        @"\x64\CUESDK_2015.dll");
+      CueSDK.PossibleX86NativePaths.Add(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) +
+                                        @"\x86\CUESDK_2015.dll");
     }
 
     public float[] Curbardata
@@ -71,7 +74,7 @@ namespace MusicBeePlugin
       set => _curbardata = value;
     }
 
-    public void Init(bool force=false)
+    public void Init(bool force = false)
     {
       if (!CueSDK.IsSDKAvailable(null))
       {
@@ -148,17 +151,24 @@ namespace MusicBeePlugin
       }
       if (_keyboard == null)
       {
-        Init(force:true);  
+        Init(force: true);
       }
       if (_keyboard == null) return;
 
       _keyboard.Brush = new SolidColorBrush(_settings?.EffectSettingBackgroundColor ?? Color.Black);
+
+      if (_spectrumGroup != null)
+      {
+        _spectrumGroup.Detach();
+        _keyboard.DetachLedGroup(_spectrumGroup);
+      }
       _spectrumGroup = new ListLedGroup(_keyboard, false, _keyboard)
       {
         Brush = _brushFactory.GetSpectrumBrush(
           _settings?.EffectSettingColorMode ?? ClSpectrumBrushFactory.ColoringMode.Solid,
           _settings?.EffectSettingPrimaryColor ?? Color.Red)
       };
+
 
       if (_settings?.EffectSettingLightbarProgress ?? false)
       {
@@ -167,37 +177,49 @@ namespace MusicBeePlugin
         {
           _progressBrush = new ClProgressBrush(_settings?.EffectSettingPrimaryColor ?? Color.Red);
         }
+
+        if (_progressGroup != null)
+        {
+          _progressGroup.Detach();
+          _keyboard.DetachLedGroup(_progressGroup);
+        }
+
         _progressGroup = new ListLedGroup(_keyboard, _lightbarLeds)
         {
           Brush = _progressBrush
         };
       }
+      else if (_progressGroup != null)
+      {
+        _progressGroup.Brush = new SolidColorBrush(Color.Transparent);
+        _keyboard.Update(true);
+        _keyboard.DetachLedGroup(_progressGroup);
+        _keyboard.Update(true);
+      }
+
       _spectrumGroup.Attach();
     }
 
     public void StopEffect()
     {
-      if (_keyboard == null || _spectrumGroup == null) return;
+      void RemoveGroup(ILedGroup group)
+      {
+        if (group == null) return;
+        group.Brush = new SolidColorBrush(Color.Transparent);
+        _keyboard.Update(true);
+        _keyboard.DetachLedGroup(group);
+        _keyboard.Update(true);
+      }
 
-      _spectrumGroup.Brush = new SolidColorBrush(Color.Black);
-      _keyboard.Update();
-      _keyboard.DetachLedGroup(_spectrumGroup);
+      if (_keyboard == null) return;
+
+      RemoveGroup(_spectrumGroup);
+      _spectrumGroup = null;
+      RemoveGroup(_progressGroup);
+      _progressGroup = null;
+
       _keyboard.Brush = null;
       _keyboard.Update(true);
-
-      _spectrumGroup.RemoveLeds(_keyboard);
-      _spectrumGroup.Detach();
-      _spectrumGroup = null;
-
-      if (_progressGroup != null)
-      {
-        _progressGroup.Brush = new SolidColorBrush(Color.Black);
-        _keyboard.Update();
-        _keyboard.DetachLedGroup(_progressGroup);
-        _progressGroup.RemoveLeds(_keyboard);
-        _progressGroup.Detach();
-        _progressGroup = null;
-      }
 
       if (IsInitialized)
       {
@@ -218,7 +240,7 @@ namespace MusicBeePlugin
         bardata[i] = Math.Min(Math.Max(bardata[i], _min), _max);
       }
 
-      int baridx = (int) Math.Min(Math.Floor((renderTarget.Point.X - rectangle.Left) / barwidth), bardata.Length-1);
+      int baridx = (int) Math.Min(Math.Floor((renderTarget.Point.X - rectangle.Left) / barwidth), bardata.Length - 1);
       return (_max - bardata[baridx]) / _max < renderTarget.Point.Y / rectangle.Height;
     }
 
