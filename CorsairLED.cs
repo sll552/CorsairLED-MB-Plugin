@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Threading;
 using System.Timers;
 using CUE.NET.Exceptions;
 using CUE.NET.Devices.Generic.Enums;
+using Timer = System.Timers.Timer;
 
 namespace MusicBeePlugin
 {
@@ -86,6 +88,8 @@ namespace MusicBeePlugin
     public void Close(PluginCloseReason reason)
     {
       _devcontroller.StopEffect();
+      // Stop is async so give it some extra time (hopefully prevents unclean shutdown)
+      Thread.Sleep(200);
     }
 
     // uninstall this plugin - clean up any persisted files
