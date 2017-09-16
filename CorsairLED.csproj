@@ -154,7 +154,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /Y "$(TargetDir)*.*" "C:\Program Files (x86)\MusicBee\Plugins\"</PostBuildEvent>
+    <PostBuildEvent>if $(ConfigurationName) == Debug copy /Y "$(TargetDir)*.*" "C:\Program Files (x86)\MusicBee\Plugins\"</PostBuildEvent>
   </PropertyGroup>
   <Import Project="packages\CUE.NET.1.1.3.1\build\net45\CUE.NET.targets" Condition="Exists('packages\CUE.NET.1.1.3.1\build\net45\CUE.NET.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
