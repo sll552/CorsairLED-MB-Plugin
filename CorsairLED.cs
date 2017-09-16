@@ -60,6 +60,7 @@ namespace MusicBeePlugin
       _pauseTimer.Elapsed += PauseTimerOnElapsed;
 
       Debug.WriteLine(_about.Name + " loaded");
+      Debug.WriteLine("MusicBee Version" + _mbApiInterface.MusicBeeVersion);
       return _about;
     }
 
@@ -89,7 +90,7 @@ namespace MusicBeePlugin
     {
       _devcontroller.StopEffect();
       // Stop is async so give it some extra time (hopefully prevents unclean shutdown)
-      Thread.Sleep(200);
+      Thread.Sleep(500);
     }
 
     // uninstall this plugin - clean up any persisted files
@@ -210,7 +211,7 @@ namespace MusicBeePlugin
     private float[] CalcBarData(int barcount)
     {
       float[] bardata = new float[barcount];
-      float[] fftdata = new float[4096];
+      float[] fftdata = new float[2048];
       var ret = _mbApiInterface.NowPlaying_GetSpectrumData(fftdata);
       int jumpwidth = (fftdata.Length/2) / barcount;
       int bar = 0;
