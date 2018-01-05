@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using CUE.NET;
 using CUE.NET.Brushes;
-using CUE.NET.Devices.Generic;
 using CUE.NET.Devices.Generic.Enums;
 using CUE.NET.Devices.Generic.EventArgs;
 using CUE.NET.Devices.Keyboard;
@@ -236,7 +235,7 @@ namespace MusicBeePlugin
 
       for (int i = 0; i < bardata.Length; i++)
       {
-        // make sure that  min > bardata > max
+        // make sure that  min < bardata < max
         bardata[i] = Math.Min(Math.Max(bardata[i], _min), _max);
       }
 
