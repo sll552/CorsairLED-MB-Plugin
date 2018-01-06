@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using CUE.NET;
 using CUE.NET.Brushes;
-using CUE.NET.Devices.Generic;
 using CUE.NET.Devices.Generic.Enums;
 using CUE.NET.Devices.Generic.EventArgs;
 using CUE.NET.Devices.Keyboard;
@@ -29,7 +28,7 @@ namespace MusicBeePlugin
     private float _min = 0.0f;
     private readonly ClSpectrumBrushFactory _brushFactory;
     private ClProgressBrush _progressBrush;
-    private ClSettings _settings;
+    private ClSettingsManager _settings;
     private bool _initAble = true;
 
     private readonly CorsairLedId[] _lightbarLeds = new CorsairLedId[]
@@ -54,6 +53,8 @@ namespace MusicBeePlugin
       CorsairLedId.Lightbar18,
       CorsairLedId.Lightbar19
     };
+
+    private ClSettings _settingsUI;
 
     public static bool IsInitialized => CueSDK.IsInitialized;
     public float TrackProgress { get; set; }
@@ -80,7 +81,7 @@ namespace MusicBeePlugin
       {
         if (!_initAble)
         {
-          _settings?.SetMessage("No SDK available");
+          _settingsUI?.SetMessage("No SDK available");
         }
         _initAble = false;
         return;
@@ -155,7 +156,7 @@ namespace MusicBeePlugin
       }
       if (_keyboard == null) return;
 
-      _keyboard.Brush = new SolidColorBrush(_settings?.EffectSettingBackgroundColor ?? Color.Black);
+      _keyboard.Brush = new SolidColorBrush(_settings?.GetBackgroundColor(GetKeyboardModel()) ?? Color.Black);
 
       if (_spectrumGroup != null)
       {
@@ -165,17 +166,17 @@ namespace MusicBeePlugin
       _spectrumGroup = new ListLedGroup(_keyboard, false, _keyboard)
       {
         Brush = _brushFactory.GetSpectrumBrush(
-          _settings?.EffectSettingColorMode ?? ClSpectrumBrushFactory.ColoringMode.Solid,
-          _settings?.EffectSettingPrimaryColor ?? Color.Red)
+          _settings?.GetColoringMode(GetKeyboardModel()) ?? ClSpectrumBrushFactory.ColoringMode.Solid,
+          _settings?.GetPrimaryColor(GetKeyboardModel()) ?? Color.Red)
       };
 
 
-      if (_settings?.EffectSettingLightbarProgress ?? false)
+      if (_settings?.GetLightbarProgress(GetKeyboardModel()) ?? false)
       {
         _spectrumGroup = _spectrumGroup.Exclude(_lightbarLeds);
         if (_progressBrush == null)
         {
-          _progressBrush = new ClProgressBrush(_settings?.EffectSettingPrimaryColor ?? Color.Red);
+          _progressBrush = new ClProgressBrush(_settings?.GetPrimaryColor(GetKeyboardModel()) ?? Color.Red);
         }
 
         if (_progressGroup != null)
@@ -236,7 +237,7 @@ namespace MusicBeePlugin
 
       for (int i = 0; i < bardata.Length; i++)
       {
-        // make sure that  min > bardata > max
+        // make sure that  min < bardata < max
         bardata[i] = Math.Min(Math.Max(bardata[i], _min), _max);
       }
 
@@ -244,9 +245,10 @@ namespace MusicBeePlugin
       return (_max - bardata[baridx]) / _max < renderTarget.Point.Y / rectangle.Height;
     }
 
-    public void AddSettings(ClSettings settings)
+    public void AddSettings(ClSettingsManager settings, ClSettings settingsUI)
     {
       _settings = settings;
+      _settingsUI = settingsUI;
     }
   }
 }

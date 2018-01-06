@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Timers;
 using CUE.NET.Exceptions;
@@ -12,7 +13,8 @@ namespace MusicBeePlugin
   {
     private MusicBeeApiInterface _mbApiInterface;
     private readonly PluginInfo _about = new PluginInfo();
-    private ClSettings _settings;
+    private ClSettings _settingsWindow;
+    private ClSettingsManager _settingsManager;
     private ClDeviceController _devcontroller;
     private readonly ClDebugPlot _debugplot = new ClDebugPlot();
     private readonly Timer _pauseTimer = new Timer();
@@ -40,11 +42,13 @@ namespace MusicBeePlugin
       {
         _devcontroller = new ClDeviceController(this);
         _devcontroller.Init();
-        _settings = new ClSettings(_about, _devcontroller, _mbApiInterface.Setting_GetPersistentStoragePath());
+        _settingsManager = new ClSettingsManager(_mbApiInterface.Setting_GetPersistentStoragePath() + "CorsairLED\\CorsairLED.settings");
+        
+        _settingsWindow = new ClSettings(_about, _devcontroller, _settingsManager);
         if (ClDeviceController.IsInitialized)
         {
           _mbApiInterface.MB_AddMenuItem("mnuTools/CL_Show Debug Plot", "HotKey For CL Debug Plot", ShowDebugPlot);
-          _devcontroller.AddSettings(_settings);
+          _devcontroller.AddSettings(_settingsManager, _settingsWindow);
           _barcount = _devcontroller.GetDesiredBarCount();
         }
       }
@@ -54,6 +58,14 @@ namespace MusicBeePlugin
         throw;
       }
       if (!ClDeviceController.IsInitialized) return null;
+
+      // migrate old config
+      if (File.Exists(_mbApiInterface.Setting_GetPersistentStoragePath() + "CorsairLED\\CorsairLED.config"))
+      {
+        _settingsManager.MigrateFromOld(_mbApiInterface.Setting_GetPersistentStoragePath() + "CorsairLED\\CorsairLED.config", _devcontroller.GetKeyboardModel());
+        File.Delete(_mbApiInterface.Setting_GetPersistentStoragePath() + "CorsairLED\\CorsairLED.config");
+        _settingsManager.Save();
+      }
 
       _pauseTimer.AutoReset = false;
       _pauseTimer.Interval = 5000;
@@ -72,7 +84,7 @@ namespace MusicBeePlugin
     public bool Configure(IntPtr panelHandle)
     {
       Debug.WriteLine(_about.Name + " Configure called with path" + _mbApiInterface.Setting_GetPersistentStoragePath());
-      _settings?.Show();
+      _settingsWindow?.Show();
 
       // This prevents showing the About Box by MusicBee
       return true;
@@ -82,7 +94,7 @@ namespace MusicBeePlugin
     // its up to you to figure out whether anything has changed and needs updating
     public void SaveSettings()
     {
-      _settings?.PersistValues();
+      _settingsWindow?.PersistValues();
     }
 
     // MusicBee is closing the plugin (plugin is being disabled by user or MusicBee is shutting down)
@@ -96,7 +108,7 @@ namespace MusicBeePlugin
     // uninstall this plugin - clean up any persisted files
     public void Uninstall()
     {
-      _settings?.Delete();
+      _settingsWindow?.Delete();
     }
 
     // receive event notifications from MusicBee
