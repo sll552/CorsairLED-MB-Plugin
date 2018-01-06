@@ -2,9 +2,9 @@
 using System.Drawing;
 using SharpConfig;
 
-namespace MusicBeePlugin
+namespace MusicBeePlugin.Settings
 {
-  class ClColorStringConverter: TypeStringConverter<Color>
+  class ColorStringConverter: TypeStringConverter<Color>
   {
     public override string ConvertToString(object value)
     {

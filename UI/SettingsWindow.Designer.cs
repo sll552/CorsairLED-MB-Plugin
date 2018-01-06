@@ -1,6 +1,6 @@
-﻿namespace MusicBeePlugin
+﻿namespace MusicBeePlugin.UI
 {
-  partial class ClSettings
+  partial class SettingsWindow
   {
     /// <summary>
     /// Required designer variable.
@@ -206,7 +206,7 @@
       this.messageLabel.TabIndex = 5;
       this.messageLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
       // 
-      // ClSettings
+      // SettingsWindow
       // 
       this.BackColor = System.Drawing.SystemColors.ControlDarkDark;
       this.ClientSize = new System.Drawing.Size(341, 216);
@@ -218,7 +218,7 @@
       this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
       this.MaximizeBox = false;
       this.MinimizeBox = false;
-      this.Name = "ClSettings";
+      this.Name = "SettingsWindow";
       this.ShowIcon = false;
       this.Text = "Corsair LED Plugin Settings";
       this.TopMost = true;

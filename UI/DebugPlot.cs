@@ -3,14 +3,14 @@ using System.Linq;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 
-namespace MusicBeePlugin
+namespace MusicBeePlugin.UI
 {
-  public partial class ClDebugPlot : Form
+  public partial class DebugPlot : Form
   {
     private readonly Series _series;
     private float _max = 0;
 
-    public ClDebugPlot()
+    public DebugPlot()
     {
       InitializeComponent();
 

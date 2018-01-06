@@ -2,14 +2,14 @@
 using CUE.NET.Brushes;
 using CUE.NET.Devices.Generic;
 
-namespace MusicBeePlugin
+namespace MusicBeePlugin.Effects
 {
-  class ClProgressBrush : SolidColorBrush
+  class ProgressBrush : SolidColorBrush
   {
 
     public float Progress { get; set; }
 
-    public ClProgressBrush(CorsairColor color) : base(color)
+    public ProgressBrush(CorsairColor color) : base(color)
     {
       Progress = 0;
     }

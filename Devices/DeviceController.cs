@@ -13,10 +13,13 @@ using CUE.NET.Devices.Keyboard.Enums;
 using CUE.NET.Exceptions;
 using CUE.NET.Groups;
 using CUE.NET.Groups.Extensions;
+using MusicBeePlugin.Effects;
+using MusicBeePlugin.Settings;
+using MusicBeePlugin.UI;
 
-namespace MusicBeePlugin
+namespace MusicBeePlugin.Devices
 {
-  public class ClDeviceController
+  public class DeviceController
   {
     private CorsairKeyboard _keyboard;
     private float[] _curbardata;
@@ -26,9 +29,9 @@ namespace MusicBeePlugin
     private readonly Plugin _plugin;
     private float _max = 1.2f;
     private float _min = 0.0f;
-    private readonly ClSpectrumBrushFactory _brushFactory;
-    private ClProgressBrush _progressBrush;
-    private ClSettingsManager _settings;
+    private readonly SpectrumBrushFactory _brushFactory;
+    private ProgressBrush _progressBrush;
+    private SettingsManager _settings;
     private bool _initAble = true;
 
     private readonly CorsairLedId[] _lightbarLeds = new CorsairLedId[]
@@ -54,15 +57,15 @@ namespace MusicBeePlugin
       CorsairLedId.Lightbar19
     };
 
-    private ClSettings _settingsUI;
+    private SettingsWindow _settingsUI;
 
     public static bool IsInitialized => CueSDK.IsInitialized;
     public float TrackProgress { get; set; }
 
-    public ClDeviceController(Plugin plugin)
+    public DeviceController(Plugin plugin)
     {
       _plugin = plugin;
-      _brushFactory = new ClSpectrumBrushFactory(this);
+      _brushFactory = new SpectrumBrushFactory(this);
       CueSDK.PossibleX64NativePaths.Add(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) +
                                         @"\x64\CUESDK_2015.dll");
       CueSDK.PossibleX86NativePaths.Add(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) +
@@ -166,7 +169,7 @@ namespace MusicBeePlugin
       _spectrumGroup = new ListLedGroup(_keyboard, false, _keyboard)
       {
         Brush = _brushFactory.GetSpectrumBrush(
-          _settings?.GetColoringMode(GetKeyboardModel()) ?? ClSpectrumBrushFactory.ColoringMode.Solid,
+          _settings?.GetColoringMode(GetKeyboardModel()) ?? SpectrumBrushFactory.ColoringMode.Solid,
           _settings?.GetPrimaryColor(GetKeyboardModel()) ?? Color.Red)
       };
 
@@ -176,7 +179,7 @@ namespace MusicBeePlugin
         _spectrumGroup = _spectrumGroup.Exclude(_lightbarLeds);
         if (_progressBrush == null)
         {
-          _progressBrush = new ClProgressBrush(_settings?.GetPrimaryColor(GetKeyboardModel()) ?? Color.Red);
+          _progressBrush = new ProgressBrush(_settings?.GetPrimaryColor(GetKeyboardModel()) ?? Color.Red);
         }
 
         if (_progressGroup != null)
@@ -245,7 +248,7 @@ namespace MusicBeePlugin
       return (_max - bardata[baridx]) / _max < renderTarget.Point.Y / rectangle.Height;
     }
 
-    public void AddSettings(ClSettingsManager settings, ClSettings settingsUI)
+    public void AddSettings(SettingsManager settings, SettingsWindow settingsUI)
     {
       _settings = settings;
       _settingsUI = settingsUI;

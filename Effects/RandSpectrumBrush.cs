@@ -1,15 +1,16 @@
-﻿using System;
+using System;
 using System.Drawing;
 using CUE.NET.Brushes;
 using CUE.NET.Devices.Generic;
+using MusicBeePlugin.Devices;
 
-namespace MusicBeePlugin
+namespace MusicBeePlugin.Effects
 {
-  class ClSolidSpectrumBrush : SolidColorBrush
+  class RandSpectrumBrush : RandomColorBrush
   {
-    private readonly ClDeviceController _controller;
+    private readonly DeviceController _controller;
 
-    public ClSolidSpectrumBrush(CorsairColor color, ClDeviceController controller) : base (color)
+    public RandSpectrumBrush(DeviceController controller)
     {
       _controller = controller ?? throw new ArgumentNullException(nameof(controller));
     }
