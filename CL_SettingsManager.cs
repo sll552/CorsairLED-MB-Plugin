@@ -1,18 +1,18 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Configuration;
 using System.Drawing;
 using System.IO;
 using SharpConfig;
+using Configuration = SharpConfig.Configuration;
 
 namespace MusicBeePlugin
 {
   /// <summary>
   /// Manages the Settings for the Plugin
   /// </summary>
-  class ClSettingsManager
+  public class ClSettingsManager
   {
     private const string GlobalSection = "Global";
-    private readonly string _configFile;
     private readonly Configuration _config;
     private string _defaultDev;
 
@@ -30,16 +30,22 @@ namespace MusicBeePlugin
       }
     }
 
+    public string ConfigFile { get; }
+
     /// <summary>
     /// Create a new Configuration Manager for the given config file. If the file exists the config is read, otherwise a new config will be created.
     /// </summary>
     /// <param name="config">Path to the config file (can't be null)</param>
     public ClSettingsManager(string config)
     {
-      _configFile = config ?? throw new ArgumentNullException();
+      ConfigFile = config ?? throw new ArgumentNullException();
       Configuration.RegisterTypeStringConverter(new ClColorStringConverter());
       Configuration.RegisterTypeStringConverter(new ClColoringModeStringConverter());
-      _config = File.Exists(_configFile) ? Configuration.LoadFromFile(_configFile) : new Configuration();
+      if (Path.GetDirectoryName(ConfigFile) != null && !Directory.Exists(Path.GetDirectoryName(ConfigFile)))
+      {
+        Directory.CreateDirectory(Path.GetDirectoryName(ConfigFile) ?? throw new InvalidOperationException());
+      }
+      _config = File.Exists(ConfigFile) ? Configuration.LoadFromFile(ConfigFile) : new Configuration();
     }
 
     /// <summary>
@@ -47,7 +53,23 @@ namespace MusicBeePlugin
     /// </summary>
     public void Save()
     {
-      _config.SaveToFile(_configFile);
+      _config.SaveToFile(ConfigFile);
+    }
+
+    /// <summary>
+    /// Delete the config file and clear the current <see cref="Configuration"/>
+    /// </summary>
+    public void Delete()
+    {
+      if (File.Exists(ConfigFile))
+      {
+        File.Delete(ConfigFile);
+      }
+      if (Path.GetDirectoryName(ConfigFile) != null && Directory.Exists(Path.GetDirectoryName(ConfigFile)))
+      {
+        Directory.Delete(Path.GetDirectoryName(ConfigFile) ?? throw new InvalidOperationException());
+      }
+      _config.Clear();
     }
 
     /// <summary>
@@ -126,7 +148,12 @@ namespace MusicBeePlugin
     /// <returns>The configured lightbar setting, if the device is not a k95 platinum false is returned</returns>
     public bool GetLightbarProgress(string device)
     {
-      return device == "K95 RGB PLATINUM" && _config[device]["LightbarProgress"].BoolValue;
+      if (device == "K95 RGB PLATINUM")
+      {
+         return _config[device].Contains("LightbarProgress") && _config[device]["LightbarProgress"].BoolValue;
+      }
+
+      return false;
     }
 
     /// <summary>
@@ -156,8 +183,33 @@ namespace MusicBeePlugin
         return _config[device];
       }
 
-      return _config.Contains(Defaultdev) ? _config[Defaultdev] : null;
+      return Defaultdev != null &&_config.Contains(Defaultdev) ? _config[Defaultdev] : null;
     }
 
+    /// <summary>
+    /// Migrates settings from the old configuration done in app.config
+    /// </summary>
+    /// <param name="oldConfigFile">Path to the old config file</param>
+    /// <param name="device">The device to use for all values</param>
+    public void MigrateFromOld(string oldConfigFile, string device)
+    {
+      string ReadKey(string key)
+      {
+        var map = new ExeConfigurationFileMap { ExeConfigFilename = Path.GetFullPath(oldConfigFile) };
+        var configFile = ConfigurationManager.OpenMappedExeConfiguration(map, ConfigurationUserLevel.None);
+        var appSettings = configFile.AppSettings.Settings;
+
+        return appSettings[key]?.Value;
+      }
+
+      SetPrimaryColor(device, ColorTranslator.FromHtml(ReadKey("ESprimColor")));
+      SetBackgroundColor(device, ColorTranslator.FromHtml(ReadKey("ESbackColor")));
+
+      Enum.TryParse<ClSpectrumBrushFactory.ColoringMode>(ReadKey("EScolorMode"), out var tmpColoringMode);
+      SetColoringMode(device, tmpColoringMode);
+
+      bool.TryParse(ReadKey("ESlbProg"), out var tmpLightbarProg);
+      SetLightbarProgress(device, tmpLightbarProg);
+    }
   }
 }
