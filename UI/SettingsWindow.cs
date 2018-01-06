@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Windows.Forms;
+using MusicBeePlugin.Devices;
+using MusicBeePlugin.Effects;
+using MusicBeePlugin.Settings;
 
-namespace MusicBeePlugin
+namespace MusicBeePlugin.UI
 {
-  public partial class ClSettings : Form
+  public partial class SettingsWindow : Form
   {
-    private readonly ClDeviceController _deviceController;
+    private readonly DeviceController _deviceController;
     private readonly Plugin.PluginInfo _about;
-    private readonly ClSettingsManager _settingsManager;
+    private readonly SettingsManager _settingsManager;
 
-    public ClSettings(Plugin.PluginInfo about, ClDeviceController dc, ClSettingsManager settingsManager)
+    public SettingsWindow(Plugin.PluginInfo about, DeviceController dc, SettingsManager settingsManager)
     {
       _deviceController = dc ?? throw new ArgumentNullException(nameof(dc));
       _about = about ?? throw new ArgumentNullException(nameof(about));
@@ -18,7 +21,7 @@ namespace MusicBeePlugin
 
       InitializeComponent();
 
-      if (ClDeviceController.IsInitialized)
+      if (DeviceController.IsInitialized)
       {
         UpdateValues();
         OneTimeInit();
@@ -30,7 +33,7 @@ namespace MusicBeePlugin
 
     private void OneTimeInit()
     {
-      colorModeComboBox.DataSource = Enum.GetValues(typeof(ClSpectrumBrushFactory.ColoringMode));
+      colorModeComboBox.DataSource = Enum.GetValues(typeof(SpectrumBrushFactory.ColoringMode));
       colorModeComboBox.SelectedIndexChanged += ColorModeComboBoxOnSelectedIndexChanged;
       detectedKeyboardLabel.Text = _deviceController.GetKeyboardModel();
       lightbarProgCheckBox.CheckStateChanged += LightbarProgCheckBoxOnCheckStateChanged;
@@ -43,7 +46,7 @@ namespace MusicBeePlugin
 
     private void ColorModeComboBoxOnSelectedIndexChanged(object sender, EventArgs eventArgs)
     {
-      Enum.TryParse<ClSpectrumBrushFactory.ColoringMode>(colorModeComboBox.SelectedValue.ToString(), out var tmp);
+      Enum.TryParse<SpectrumBrushFactory.ColoringMode>(colorModeComboBox.SelectedValue.ToString(), out var tmp);
       _settingsManager.SetColoringMode(_deviceController.GetKeyboardModel(), tmp);
     }
 

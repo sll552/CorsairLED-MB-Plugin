@@ -2,15 +2,16 @@
 using System.Configuration;
 using System.Drawing;
 using System.IO;
+using MusicBeePlugin.Effects;
 using SharpConfig;
 using Configuration = SharpConfig.Configuration;
 
-namespace MusicBeePlugin
+namespace MusicBeePlugin.Settings
 {
   /// <summary>
   /// Manages the Settings for the Plugin
   /// </summary>
-  public class ClSettingsManager
+  public class SettingsManager
   {
     private const string GlobalSection = "Global";
     private readonly Configuration _config;
@@ -36,11 +37,11 @@ namespace MusicBeePlugin
     /// Create a new Configuration Manager for the given config file. If the file exists the config is read, otherwise a new config will be created.
     /// </summary>
     /// <param name="config">Path to the config file (can't be null)</param>
-    public ClSettingsManager(string config)
+    public SettingsManager(string config)
     {
       ConfigFile = config ?? throw new ArgumentNullException();
-      Configuration.RegisterTypeStringConverter(new ClColorStringConverter());
-      Configuration.RegisterTypeStringConverter(new ClColoringModeStringConverter());
+      Configuration.RegisterTypeStringConverter(new ColorStringConverter());
+      Configuration.RegisterTypeStringConverter(new ColoringModeStringConverter());
       if (Path.GetDirectoryName(ConfigFile) != null && !Directory.Exists(Path.GetDirectoryName(ConfigFile)))
       {
         Directory.CreateDirectory(Path.GetDirectoryName(ConfigFile) ?? throw new InvalidOperationException());
@@ -123,11 +124,11 @@ namespace MusicBeePlugin
     /// </summary>
     /// <param name="device">The name of the device</param>
     /// <returns>The configured coloring mode, or ColoringMode.Solid if none can be found</returns>
-    public ClSpectrumBrushFactory.ColoringMode GetColoringMode(string device)
+    public SpectrumBrushFactory.ColoringMode GetColoringMode(string device)
     {
       const string key = "ColoringMode";
       var section = GetSectionForDev(device, key);
-      return section?[key].GetValue<ClSpectrumBrushFactory.ColoringMode>() ?? ClSpectrumBrushFactory.ColoringMode.Solid;
+      return section?[key].GetValue<SpectrumBrushFactory.ColoringMode>() ?? SpectrumBrushFactory.ColoringMode.Solid;
     }
 
     /// <summary>
@@ -135,7 +136,7 @@ namespace MusicBeePlugin
     /// </summary>
     /// <param name="device">The name of the device</param>
     /// <param name="cm">The coloring mode to set</param>
-    public void SetColoringMode(string device, ClSpectrumBrushFactory.ColoringMode cm)
+    public void SetColoringMode(string device, SpectrumBrushFactory.ColoringMode cm)
     {
       var section = _config[device];
       section["ColoringMode"].SetValue(cm);
@@ -205,7 +206,7 @@ namespace MusicBeePlugin
       SetPrimaryColor(device, ColorTranslator.FromHtml(ReadKey("ESprimColor")));
       SetBackgroundColor(device, ColorTranslator.FromHtml(ReadKey("ESbackColor")));
 
-      Enum.TryParse<ClSpectrumBrushFactory.ColoringMode>(ReadKey("EScolorMode"), out var tmpColoringMode);
+      Enum.TryParse<SpectrumBrushFactory.ColoringMode>(ReadKey("EScolorMode"), out var tmpColoringMode);
       SetColoringMode(device, tmpColoringMode);
 
       bool.TryParse(ReadKey("ESlbProg"), out var tmpLightbarProg);

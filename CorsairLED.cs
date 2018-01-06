@@ -5,6 +5,9 @@ using System.Threading;
 using System.Timers;
 using CUE.NET.Exceptions;
 using CUE.NET.Devices.Generic.Enums;
+using MusicBeePlugin.Devices;
+using MusicBeePlugin.Settings;
+using MusicBeePlugin.UI;
 using Timer = System.Timers.Timer;
 
 namespace MusicBeePlugin
@@ -13,10 +16,10 @@ namespace MusicBeePlugin
   {
     private MusicBeeApiInterface _mbApiInterface;
     private readonly PluginInfo _about = new PluginInfo();
-    private ClSettings _settingsWindow;
-    private ClSettingsManager _settingsManager;
-    private ClDeviceController _devcontroller;
-    private readonly ClDebugPlot _debugplot = new ClDebugPlot();
+    private SettingsWindow _settingsWindow;
+    private SettingsManager _settingsManager;
+    private DeviceController _devcontroller;
+    private readonly DebugPlot _debugplot = new DebugPlot();
     private readonly Timer _pauseTimer = new Timer();
     private int _barcount = 22;
 
@@ -40,12 +43,12 @@ namespace MusicBeePlugin
 
       try
       {
-        _devcontroller = new ClDeviceController(this);
+        _devcontroller = new DeviceController(this);
         _devcontroller.Init();
-        _settingsManager = new ClSettingsManager(_mbApiInterface.Setting_GetPersistentStoragePath() + "CorsairLED\\CorsairLED.settings");
+        _settingsManager = new SettingsManager(_mbApiInterface.Setting_GetPersistentStoragePath() + "CorsairLED\\CorsairLED.settings");
         
-        _settingsWindow = new ClSettings(_about, _devcontroller, _settingsManager);
-        if (ClDeviceController.IsInitialized)
+        _settingsWindow = new SettingsWindow(_about, _devcontroller, _settingsManager);
+        if (DeviceController.IsInitialized)
         {
           _mbApiInterface.MB_AddMenuItem("mnuTools/CL_Show Debug Plot", "HotKey For CL Debug Plot", ShowDebugPlot);
           _devcontroller.AddSettings(_settingsManager, _settingsWindow);
@@ -57,7 +60,7 @@ namespace MusicBeePlugin
         Console.WriteLine("CUE Exception! ErrorCode: " + Enum.GetName(typeof(CorsairError), ex.Error));
         throw;
       }
-      if (!ClDeviceController.IsInitialized) return null;
+      if (!DeviceController.IsInitialized) return null;
 
       // migrate old config
       if (File.Exists(_mbApiInterface.Setting_GetPersistentStoragePath() + "CorsairLED\\CorsairLED.config"))

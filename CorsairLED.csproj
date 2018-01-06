@@ -92,27 +92,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CL_ColoringModeStringConverter.cs" />
-    <Compile Include="CL_ColorStringConverter.cs" />
-    <Compile Include="CL_LinGradSpectrumBrush.cs" />
-    <Compile Include="CL_ProgressBrush.cs" />
-    <Compile Include="CL_RandSpectrumBrush.cs" />
-    <Compile Include="CL_SettingsManager.cs" />
-    <Compile Include="CL_SolidSpectrumBrush.cs" />
-    <Compile Include="CL_DebugPlot.cs">
+    <Compile Include="Settings\ColoringModeStringConverter.cs" />
+    <Compile Include="Settings\ColorStringConverter.cs" />
+    <Compile Include="Effects\LinGradSpectrumBrush.cs" />
+    <Compile Include="Effects\ProgressBrush.cs" />
+    <Compile Include="Effects\RandSpectrumBrush.cs" />
+    <Compile Include="Settings\SettingsManager.cs" />
+    <Compile Include="Effects\SolidSpectrumBrush.cs" />
+    <Compile Include="UI\DebugPlot.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="CL_DebugPlot.Designer.cs">
-      <DependentUpon>CL_DebugPlot.cs</DependentUpon>
+    <Compile Include="UI\DebugPlot.Designer.cs">
+      <DependentUpon>DebugPlot.cs</DependentUpon>
     </Compile>
-    <Compile Include="CL_DeviceController.cs" />
-    <Compile Include="CL_Settings.cs">
+    <Compile Include="Devices\DeviceController.cs" />
+    <Compile Include="UI\SettingsWindow.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="CL_Settings.Designer.cs">
-      <DependentUpon>CL_Settings.cs</DependentUpon>
+    <Compile Include="UI\SettingsWindow.Designer.cs">
+      <DependentUpon>SettingsWindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="CL_SpectrumBrushFactory.cs" />
+    <Compile Include="Effects\SpectrumBrushFactory.cs" />
     <Compile Include="MusicBeeInterface.cs" />
     <Compile Include="CorsairLED.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -148,11 +148,11 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="CL_DebugPlot.resx">
-      <DependentUpon>CL_DebugPlot.cs</DependentUpon>
+    <EmbeddedResource Include="UI\DebugPlot.resx">
+      <DependentUpon>DebugPlot.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="CL_Settings.resx">
-      <DependentUpon>CL_Settings.cs</DependentUpon>
+    <EmbeddedResource Include="UI\SettingsWindow.resx">
+      <DependentUpon>SettingsWindow.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,6 @@
-﻿namespace MusicBeePlugin
+﻿namespace MusicBeePlugin.UI
 {
-  partial class ClDebugPlot
+  partial class DebugPlot
   {
     /// <summary>
     /// Required designer variable.
@@ -65,14 +65,14 @@
       this.chart1.TabIndex = 2;
       this.chart1.Text = "chart1";
       // 
-      // ClDebugPlot
+      // DebugPlot
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.ClientSize = new System.Drawing.Size(604, 403);
       this.Controls.Add(this.chart1);
       this.Controls.Add(this.button1);
-      this.Name = "ClDebugPlot";
+      this.Name = "DebugPlot";
       this.ShowIcon = false;
       this.Text = "CL_DebugPlot";
       ((System.ComponentModel.ISupportInitialize)(this.chart1)).EndInit();

@@ -2,10 +2,11 @@
 using System.Drawing;
 using CUE.NET.Brushes;
 using CUE.NET.Gradients;
+using MusicBeePlugin.Devices;
 
-namespace MusicBeePlugin
+namespace MusicBeePlugin.Effects
 {
-  public class ClSpectrumBrushFactory
+  public class SpectrumBrushFactory
   {
     public enum ColoringMode
     {
@@ -14,9 +15,9 @@ namespace MusicBeePlugin
       Random
     }
 
-    private readonly ClDeviceController _controller;
+    private readonly DeviceController _controller;
 
-    public ClSpectrumBrushFactory(ClDeviceController controller)
+    public SpectrumBrushFactory(DeviceController controller)
     {
       _controller = controller ?? throw new ArgumentNullException(nameof(controller));
     }
@@ -26,11 +27,11 @@ namespace MusicBeePlugin
       switch (mode)
       {
         case ColoringMode.Solid:
-          return new ClSolidSpectrumBrush(primColor, _controller);
+          return new SolidSpectrumBrush(primColor, _controller);
         case ColoringMode.Gradient:
-          return new ClLinGradSpectrumBrush(new RainbowGradient(primColor.GetHue(), primColor.GetHue() + 360f),_controller);
+          return new LinGradSpectrumBrush(new RainbowGradient(primColor.GetHue(), primColor.GetHue() + 360f),_controller);
         case ColoringMode.Random:
-          return new ClRandSpectrumBrush(_controller);
+          return new RandSpectrumBrush(_controller);
         default:
           return null;
       }
