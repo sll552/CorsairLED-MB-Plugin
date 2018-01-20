@@ -92,6 +92,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Devices\AbstractEffectDevice.cs" />
+    <Compile Include="Devices\ISpectrumDevice.cs" />
+    <Compile Include="Devices\KeyboardEffectDevice.cs" />
     <Compile Include="Settings\ColoringModeStringConverter.cs" />
     <Compile Include="Settings\ColorStringConverter.cs" />
     <Compile Include="Effects\LinGradSpectrumBrush.cs" />

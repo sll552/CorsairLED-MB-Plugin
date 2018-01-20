@@ -9,16 +9,16 @@ namespace MusicBeePlugin.Effects
 {
   class LinGradSpectrumBrush : LinearGradientBrush
   {
-    private readonly DeviceController _controller;
+    private readonly ISpectrumDevice _device;
 
-    public LinGradSpectrumBrush(IGradient gradient, DeviceController controller) : base (gradient)
+    public LinGradSpectrumBrush(IGradient gradient, ISpectrumDevice device) : base (gradient)
     {
-      _controller = controller ?? throw new ArgumentNullException(nameof(controller));
+      _device = device ?? throw new ArgumentNullException(nameof(device));
     }
 
     protected override CorsairColor GetColorAtPoint(RectangleF rectangle, BrushRenderTarget renderTarget)
     {
-      return _controller.IsInSpectrum(rectangle,renderTarget) ? base.GetColorAtPoint(rectangle, renderTarget) : CorsairColor.Transparent;
+      return _device.IsInSpectrum(rectangle,renderTarget) ? base.GetColorAtPoint(rectangle, renderTarget) : CorsairColor.Transparent;
     }
   }
 }

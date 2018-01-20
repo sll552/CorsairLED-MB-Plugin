@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Windows.Forms;
 using MusicBeePlugin.Devices;
 using MusicBeePlugin.Effects;
@@ -12,6 +13,7 @@ namespace MusicBeePlugin.UI
     private readonly DeviceController _deviceController;
     private readonly Plugin.PluginInfo _about;
     private readonly SettingsManager _settingsManager;
+    private KeyboardEffectDevice _keyboard;
 
     public SettingsWindow(Plugin.PluginInfo about, DeviceController dc, SettingsManager settingsManager)
     {
@@ -23,6 +25,7 @@ namespace MusicBeePlugin.UI
 
       if (DeviceController.IsInitialized)
       {
+        _keyboard = _deviceController.Devices.OfType<KeyboardEffectDevice>().First();
         UpdateValues();
         OneTimeInit();
       }
@@ -35,23 +38,23 @@ namespace MusicBeePlugin.UI
     {
       colorModeComboBox.DataSource = Enum.GetValues(typeof(SpectrumBrushFactory.ColoringMode));
       colorModeComboBox.SelectedIndexChanged += ColorModeComboBoxOnSelectedIndexChanged;
-      detectedKeyboardLabel.Text = _deviceController.GetKeyboardModel();
       lightbarProgCheckBox.CheckStateChanged += LightbarProgCheckBoxOnCheckStateChanged;
     }
 
     private void LightbarProgCheckBoxOnCheckStateChanged(object sender, EventArgs eventArgs)
     {
-      _settingsManager.SetLightbarProgress(_deviceController.GetKeyboardModel(), lightbarProgCheckBox.Checked);
+      _settingsManager.SetLightbarProgress(_keyboard.DeviceName, lightbarProgCheckBox.Checked);
     }
 
     private void ColorModeComboBoxOnSelectedIndexChanged(object sender, EventArgs eventArgs)
     {
       Enum.TryParse<SpectrumBrushFactory.ColoringMode>(colorModeComboBox.SelectedValue.ToString(), out var tmp);
-      _settingsManager.SetColoringMode(_deviceController.GetKeyboardModel(), tmp);
+      _settingsManager.SetColoringMode(_keyboard.DeviceName, tmp);
     }
 
     private void CL_Settings_OnShown(object sender, EventArgs eventArgs)
     {
+      _keyboard = _deviceController.Devices.OfType<KeyboardEffectDevice>().First();
       UpdateValues();
     }
 
@@ -70,11 +73,11 @@ namespace MusicBeePlugin.UI
 
     private void UpdateValues()
     {
-      primaryColorPicker.BackColor = _settingsManager.GetPrimaryColor(_deviceController.GetKeyboardModel());
-      backColorPicker.BackColor = _settingsManager.GetBackgroundColor(_deviceController.GetKeyboardModel());
-      colorModeComboBox.SelectedItem = _settingsManager.GetColoringMode(_deviceController.GetKeyboardModel());
-      lightbarProgCheckBox.Checked = _settingsManager.GetLightbarProgress(_deviceController.GetKeyboardModel());
-
+      detectedKeyboardLabel.Text = _keyboard.DeviceName;
+      primaryColorPicker.BackColor = _settingsManager.GetPrimaryColor(_keyboard.DeviceName);
+      backColorPicker.BackColor = _settingsManager.GetBackgroundColor(_keyboard.DeviceName);
+      colorModeComboBox.SelectedItem = _settingsManager.GetColoringMode(_keyboard.DeviceName);
+      lightbarProgCheckBox.Checked = _settingsManager.GetLightbarProgress(_keyboard.DeviceName);
     }
 
     public void PersistValues()
@@ -85,14 +88,14 @@ namespace MusicBeePlugin.UI
     private void primaryColorPicker_Click(object sender, EventArgs e)
     {
       if (colorDialog1.ShowDialog() != DialogResult.OK) return;
-      _settingsManager.SetPrimaryColor(_deviceController.GetKeyboardModel(),colorDialog1.Color);
+      _settingsManager.SetPrimaryColor(_keyboard.DeviceName,colorDialog1.Color);
       primaryColorPicker.BackColor = colorDialog1.Color;
     }
 
     private void backColorPicker_Click(object sender, EventArgs e)
     {
       if (colorDialog1.ShowDialog() != DialogResult.OK) return;
-      _settingsManager.SetBackgroundColor(_deviceController.GetKeyboardModel(), colorDialog1.Color);
+      _settingsManager.SetBackgroundColor(_keyboard.DeviceName, colorDialog1.Color);
       backColorPicker.BackColor = colorDialog1.Color;
     }
 
