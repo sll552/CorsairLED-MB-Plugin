@@ -19,6 +19,7 @@ namespace MusicBeePlugin.Devices
     private readonly Plugin _plugin;
     private readonly SettingsManager _settings;
     private bool _initAble = true;
+    // ReSharper disable once InconsistentNaming
     private SettingsWindow _settingsUI;
     private readonly List<AbstractEffectDevice> _devices = new List<AbstractEffectDevice>();
 

@@ -95,6 +95,7 @@
     <Compile Include="Devices\AbstractEffectDevice.cs" />
     <Compile Include="Devices\ISpectrumDevice.cs" />
     <Compile Include="Devices\KeyboardEffectDevice.cs" />
+    <Compile Include="Settings\EffectStringConverter.cs" />
     <Compile Include="Settings\ColoringModeStringConverter.cs" />
     <Compile Include="Settings\ColorStringConverter.cs" />
     <Compile Include="Effects\LinGradSpectrumBrush.cs" />
@@ -109,6 +110,12 @@
       <DependentUpon>DebugPlot.cs</DependentUpon>
     </Compile>
     <Compile Include="Devices\DeviceController.cs" />
+    <Compile Include="UI\DeviceSettings.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UI\DeviceSettings.Designer.cs">
+      <DependentUpon>DeviceSettings.cs</DependentUpon>
+    </Compile>
     <Compile Include="UI\SettingsWindow.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -153,6 +160,9 @@
   <ItemGroup>
     <EmbeddedResource Include="UI\DebugPlot.resx">
       <DependentUpon>DebugPlot.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UI\DeviceSettings.resx">
+      <DependentUpon>DeviceSettings.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="UI\SettingsWindow.resx">
       <DependentUpon>SettingsWindow.cs</DependentUpon>

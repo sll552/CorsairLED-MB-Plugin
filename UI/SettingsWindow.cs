@@ -1,19 +1,22 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Windows.Forms;
 using MusicBeePlugin.Devices;
-using MusicBeePlugin.Effects;
 using MusicBeePlugin.Settings;
 
 namespace MusicBeePlugin.UI
 {
   public partial class SettingsWindow : Form
   {
+    // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
     private readonly DeviceController _deviceController;
     private readonly Plugin.PluginInfo _about;
     private readonly SettingsManager _settingsManager;
-    private KeyboardEffectDevice _keyboard;
+    private readonly List<AbstractEffectDevice> _devices;
+    // ReSharper disable once CollectionNeverQueried.Local
+    private readonly List<TabPage> _tabPages = new List<TabPage>();
+    private readonly BindingSource _binding = new BindingSource();
 
     public SettingsWindow(Plugin.PluginInfo about, DeviceController dc, SettingsManager settingsManager)
     {
@@ -25,36 +28,18 @@ namespace MusicBeePlugin.UI
 
       if (DeviceController.IsInitialized)
       {
-        _keyboard = _deviceController.Devices.OfType<KeyboardEffectDevice>().First();
+        _devices = new List<AbstractEffectDevice>(_deviceController.Devices);
+        UpdateDeviceTable();
+        CreateTabs();
         UpdateValues();
-        OneTimeInit();
       }
 
       FormClosing += CL_Settings_FormClosing;
       Shown += CL_Settings_OnShown;
     }
-
-    private void OneTimeInit()
-    {
-      colorModeComboBox.DataSource = Enum.GetValues(typeof(SpectrumBrushFactory.ColoringMode));
-      colorModeComboBox.SelectedIndexChanged += ColorModeComboBoxOnSelectedIndexChanged;
-      lightbarProgCheckBox.CheckStateChanged += LightbarProgCheckBoxOnCheckStateChanged;
-    }
-
-    private void LightbarProgCheckBoxOnCheckStateChanged(object sender, EventArgs eventArgs)
-    {
-      _settingsManager.SetLightbarProgress(_keyboard.DeviceName, lightbarProgCheckBox.Checked);
-    }
-
-    private void ColorModeComboBoxOnSelectedIndexChanged(object sender, EventArgs eventArgs)
-    {
-      Enum.TryParse<SpectrumBrushFactory.ColoringMode>(colorModeComboBox.SelectedValue.ToString(), out var tmp);
-      _settingsManager.SetColoringMode(_keyboard.DeviceName, tmp);
-    }
-
+    
     private void CL_Settings_OnShown(object sender, EventArgs eventArgs)
     {
-      _keyboard = _deviceController.Devices.OfType<KeyboardEffectDevice>().First();
       UpdateValues();
     }
 
@@ -65,38 +50,82 @@ namespace MusicBeePlugin.UI
       e.Cancel = true;
     }
 
-    private void saveCloseButton_Click(object sender, EventArgs e)
+    private void SaveCloseButton_Click(object sender, EventArgs e)
     {
       PersistValues();
       Hide();
     }
 
+    private void UpdateDeviceTable()
+    {
+      dataGridView1.Columns.Clear();
+      dataGridView1.Rows.Clear();
+      _binding.Clear();
+
+      foreach (var dev in _devices)
+      {
+        _binding.Add(dev);
+      }
+
+      dataGridView1.AutoGenerateColumns = false;
+      dataGridView1.DataSource = _binding;
+
+      dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
+      {
+        ReadOnly = true,
+        DataPropertyName = "DeviceName",
+        Name = "Name"
+      });
+
+      dataGridView1.Columns.Add(new DataGridViewCheckBoxColumn
+      {
+        DataPropertyName = "IsDefaultDevice",
+        Name = "Default"
+      });
+
+      dataGridView1.Columns.Add(new DataGridViewComboBoxColumn
+      {
+        DataSource = Enum.GetValues(typeof(AbstractEffectDevice.Effect)),
+        DataPropertyName = "ActiveEffect",
+        Name = "Effect"
+      });
+
+      dataGridView1.Columns.Add(new DataGridViewCheckBoxColumn
+      {
+        DataPropertyName = "Enabled",
+        Name = "Enabled"
+      });
+
+    }
+
+    private void CreateTabs()
+    {
+      tabControl1.Controls.Clear();
+      foreach (var dev in _devices)
+      {
+        var deviceSettings = new DeviceSettings(_settingsManager, dev);
+        var tabpage = new TabPage(dev.DeviceName);
+        deviceSettings.Dock = DockStyle.Fill;
+        tabpage.Controls.Add(deviceSettings);
+        _tabPages.Add(tabpage);
+        tabControl1.Controls.Add(tabpage);
+      }
+    }
+
     private void UpdateValues()
     {
-      detectedKeyboardLabel.Text = _keyboard.DeviceName;
-      primaryColorPicker.BackColor = _settingsManager.GetPrimaryColor(_keyboard.DeviceName);
-      backColorPicker.BackColor = _settingsManager.GetBackgroundColor(_keyboard.DeviceName);
-      colorModeComboBox.SelectedItem = _settingsManager.GetColoringMode(_keyboard.DeviceName);
-      lightbarProgCheckBox.Checked = _settingsManager.GetLightbarProgress(_keyboard.DeviceName);
+      foreach (var tab in tabControl1.Controls)
+      {
+        if (tab is DeviceSettings deviceSettings)
+        {
+          deviceSettings.UpdateValues();
+        }
+      }
     }
 
     public void PersistValues()
     {
       _settingsManager.Save();
-    }
-
-    private void primaryColorPicker_Click(object sender, EventArgs e)
-    {
-      if (colorDialog1.ShowDialog() != DialogResult.OK) return;
-      _settingsManager.SetPrimaryColor(_keyboard.DeviceName,colorDialog1.Color);
-      primaryColorPicker.BackColor = colorDialog1.Color;
-    }
-
-    private void backColorPicker_Click(object sender, EventArgs e)
-    {
-      if (colorDialog1.ShowDialog() != DialogResult.OK) return;
-      _settingsManager.SetBackgroundColor(_keyboard.DeviceName, colorDialog1.Color);
-      backColorPicker.BackColor = colorDialog1.Color;
     }
 
     public void Delete()
@@ -108,8 +137,8 @@ namespace MusicBeePlugin.UI
     {
       Debug.Assert(_about != null, "_about != null");
       MessageBox.Show(this,
-        _about.Name + " v" + _about.VersionMajor + "." + _about.VersionMinor + "." + _about.Revision + "\nAuthor: " +
-        _about.Author, "About CorsairLED", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        $@"{_about.Name} v{_about.VersionMajor}.{_about.VersionMinor}.{_about.Revision}
+Author: {_about.Author}", @"About CorsairLED", MessageBoxButtons.OK, MessageBoxIcon.Information);
     }
 
     public void SetMessage(string msg)

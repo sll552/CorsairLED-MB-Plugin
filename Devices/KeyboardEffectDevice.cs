@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using CUE.NET.Brushes;
@@ -21,8 +22,7 @@ namespace MusicBeePlugin.Devices
     private float _min = 0.0f;
     private readonly SpectrumBrushFactory _brushFactory;
     private ProgressBrush _progressBrush;
-    private readonly CorsairLedId[] _lightbarLeds = new CorsairLedId[]
-    {
+    private readonly CorsairLedId[] _lightbarLeds = {
       CorsairLedId.Lightbar1,
       CorsairLedId.Lightbar2,
       CorsairLedId.Lightbar3,
@@ -47,51 +47,51 @@ namespace MusicBeePlugin.Devices
     public KeyboardEffectDevice(CorsairKeyboard device, SettingsManager settings, DeviceController controller) : base(device, settings, controller)
     {
       _brushFactory = new SpectrumBrushFactory(this);
-      _device.Updated += KeyboardOnUpdated;
+      Device.Updated += KeyboardOnUpdated;
     }
 
     private void KeyboardOnUpdated(object sender, UpdatedEventArgs args)
     {
-      _controller.UpdateSpectrographData();
+      Controller.UpdateSpectrographData();
       if (_progressBrush != null)
       {
-        _progressBrush.Progress = _controller.TrackProgress;
+        _progressBrush.Progress = Controller.TrackProgress;
       }
     }
 
     public override void StartEffect()
     {
-      if (_settings == null) return;
+      if (Settings == null || ActiveEffect != Effect.Spectrograph || !Enabled) return;
 
-      _device.Brush = new SolidColorBrush(_settings.GetBackgroundColor(DeviceName));
+      Device.Brush = new SolidColorBrush(Settings.GetBackgroundColor(DeviceName));
 
       if (_spectrumGroup != null)
       {
         _spectrumGroup.Detach();
-        _device.DetachLedGroup(_spectrumGroup);
+        Device.DetachLedGroup(_spectrumGroup);
       }
 
-      _spectrumGroup = new ListLedGroup(_device, false, _device)
+      _spectrumGroup = new ListLedGroup(Device, false, Device)
       {
-        Brush = _brushFactory.GetSpectrumBrush(_settings.GetColoringMode(DeviceName), _settings.GetPrimaryColor(DeviceName))
+        Brush = _brushFactory.GetSpectrumBrush(Settings.GetColoringMode(DeviceName), Settings.GetPrimaryColor(DeviceName))
       };
 
 
-      if (_settings.GetLightbarProgress(DeviceName))
+      if (Settings.GetLightbarProgress(DeviceName))
       {
         _spectrumGroup = _spectrumGroup.Exclude(_lightbarLeds);
         if (_progressBrush == null)
         {
-          _progressBrush = new ProgressBrush(_settings.GetPrimaryColor(DeviceName));
+          _progressBrush = new ProgressBrush(Settings.GetPrimaryColor(DeviceName));
         }
 
         if (_progressGroup != null)
         {
           _progressGroup.Detach();
-          _device.DetachLedGroup(_progressGroup);
+          Device.DetachLedGroup(_progressGroup);
         }
 
-        _progressGroup = new ListLedGroup(_device, _lightbarLeds)
+        _progressGroup = new ListLedGroup(Device, _lightbarLeds)
         {
           Brush = _progressBrush
         };
@@ -99,9 +99,9 @@ namespace MusicBeePlugin.Devices
       else if (_progressGroup != null)
       {
         _progressGroup.Brush = new SolidColorBrush(Color.Transparent);
-        _device.Update(true);
-        _device.DetachLedGroup(_progressGroup);
-        _device.Update(true);
+        Device.Update(true);
+        Device.DetachLedGroup(_progressGroup);
+        Device.Update(true);
       }
       _spectrumGroup.Attach();
     }
@@ -112,30 +112,30 @@ namespace MusicBeePlugin.Devices
       {
         if (group == null) return;
         group.Brush = new SolidColorBrush(Color.Transparent);
-        _device.Update(true);
-        _device.DetachLedGroup(group);
-        _device.Update(true);
+        Device.Update(true);
+        Device.DetachLedGroup(group);
+        Device.Update(true);
       }
 
-      if (_device == null) return;
+      if (Device == null) return;
 
       RemoveGroup(_spectrumGroup);
       _spectrumGroup = null;
       RemoveGroup(_progressGroup);
       _progressGroup = null;
 
-      _device.Brush = null;
-      _device.Update(true);
+      Device.Brush = null;
+      Device.Update(true);
     }
 
-    public override Effect[] GetSupportedEffects()
+    public override IEnumerable<Effect> GetSupportedEffects()
     {
-      return new[] { Effect.Spectrograph };
+      return new[] { Effect.Spectrograph, Effect.None };
     }
 
     public bool IsInSpectrum(RectangleF rectangle, BrushRenderTarget renderTarget)
     {
-      var bardata = _controller.Curbardata;
+      var bardata = Controller.Curbardata;
       if (bardata == null) return false;
 
       var barwidth = (int)Math.Floor(rectangle.Width / bardata.Length);
@@ -153,10 +153,10 @@ namespace MusicBeePlugin.Devices
     public int GetDesiredBarCount()
     {
       // This spans a ledgroup over the number row of the keyboard which is most likely the row with the most keys
-      var rectangleLedGroup = new RectangleLedGroup(_device,
-        new PointF(0f, _device[CorsairKeyboardLedId.D1].LedRectangle.Location.Y),
-        new PointF(_device.DeviceRectangle.Width + 10,
-          _device[CorsairKeyboardLedId.Backspace].LedRectangle.Location.Y * 1.1f), 0.1f, false);
+      var rectangleLedGroup = new RectangleLedGroup(Device,
+        new PointF(0f, Device[CorsairKeyboardLedId.D1].LedRectangle.Location.Y),
+        new PointF(Device.DeviceRectangle.Width + 10,
+          Device[CorsairKeyboardLedId.Backspace].LedRectangle.Location.Y * 1.1f), 0.1f, false);
 
       return rectangleLedGroup.GetLeds().Count();
     }

@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Runtime.InteropServices;
+using System.Collections.Generic;
+using System.Linq;
 using CUE.NET.Devices.Generic;
 using CUE.NET.Devices.Generic.Enums;
-using CUE.NET.Devices.Keyboard;
 using MusicBeePlugin.Settings;
 
 namespace MusicBeePlugin.Devices
@@ -16,22 +16,55 @@ namespace MusicBeePlugin.Devices
       None
     }
 
-    protected readonly AbstractCueDevice _device;
-    protected readonly SettingsManager _settings;
-    protected readonly DeviceController _controller;
+    protected readonly AbstractCueDevice Device;
+    protected readonly SettingsManager Settings;
+    protected readonly DeviceController Controller;
 
-    public CorsairDeviceType DeviceType => _device.DeviceInfo.Type;
-    public string DeviceName => _device.DeviceInfo.Model;
+    public CorsairDeviceType DeviceType => Device.DeviceInfo.Type;
+    public string DeviceName => Device.DeviceInfo.Model;
+
+    public bool IsDefaultDevice
+    {
+      get => Settings.Defaultdev == DeviceName;
+      set
+      {
+        if (value)
+        {
+          Settings.Defaultdev = DeviceName;
+        }
+        else if (IsDefaultDevice)
+        {
+          Settings.Defaultdev = null;
+        }
+      } 
+    } 
+
+    public Effect ActiveEffect
+    {
+      get => Settings.GetEffect(DeviceName);
+      set
+      {
+        if (GetSupportedEffects().Contains(value))
+        {
+          Settings.SetEffect(DeviceName,value);
+        }
+      }
+    } 
+    public bool Enabled
+    {
+      get => Settings.GetEnabled(DeviceName);
+      set => Settings.SetEnabled(DeviceName, value);
+    }
 
     protected AbstractEffectDevice(AbstractCueDevice device, SettingsManager settings, DeviceController controller)
     {
-      _device = device ?? throw new ArgumentNullException(nameof(device));
-      _settings = settings ?? throw new ArgumentNullException(nameof(settings));
-      _controller = controller ?? throw new ArgumentNullException(nameof(controller));
+      Device = device ?? throw new ArgumentNullException(nameof(device));
+      Settings = settings ?? throw new ArgumentNullException(nameof(settings));
+      Controller = controller ?? throw new ArgumentNullException(nameof(controller));
     }
 
     public abstract void StartEffect();
     public abstract void StopEffect();
-    public abstract Effect[] GetSupportedEffects();
+    public abstract IEnumerable<Effect> GetSupportedEffects();
   }
 }

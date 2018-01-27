@@ -2,6 +2,7 @@
 using System.Configuration;
 using System.Drawing;
 using System.IO;
+using MusicBeePlugin.Devices;
 using MusicBeePlugin.Effects;
 using SharpConfig;
 using Configuration = SharpConfig.Configuration;
@@ -14,7 +15,7 @@ namespace MusicBeePlugin.Settings
   public class SettingsManager
   {
     private const string GlobalSection = "Global";
-    private readonly Configuration _config;
+    private Configuration _config;
     private string _defaultDev;
 
     /// <summary>
@@ -27,7 +28,7 @@ namespace MusicBeePlugin.Settings
       {
         _defaultDev = value;
         var section = _config[GlobalSection];
-        section["DefaultDevice"].StringValue = _defaultDev;
+        section["DefaultDevice"].StringValue = _defaultDev ?? "";
       }
     }
 
@@ -42,11 +43,21 @@ namespace MusicBeePlugin.Settings
       ConfigFile = config ?? throw new ArgumentNullException();
       Configuration.RegisterTypeStringConverter(new ColorStringConverter());
       Configuration.RegisterTypeStringConverter(new ColoringModeStringConverter());
+      Configuration.RegisterTypeStringConverter(new EffectStringConverter());
       if (Path.GetDirectoryName(ConfigFile) != null && !Directory.Exists(Path.GetDirectoryName(ConfigFile)))
       {
         Directory.CreateDirectory(Path.GetDirectoryName(ConfigFile) ?? throw new InvalidOperationException());
       }
+      Load();
+    }
+
+    /// <summary>
+    /// Load the configuration from the specified <see cref="ConfigFile"/>
+    /// </summary>
+    private void Load()
+    {
       _config = File.Exists(ConfigFile) ? Configuration.LoadFromFile(ConfigFile) : new Configuration();
+      _defaultDev = _config[GlobalSection]?["DefaultDevice"]?.StringValue != "" ? _config[GlobalSection]?["DefaultDevice"]?.StringValue : null;
     }
 
     /// <summary>
@@ -71,6 +82,15 @@ namespace MusicBeePlugin.Settings
         Directory.Delete(Path.GetDirectoryName(ConfigFile) ?? throw new InvalidOperationException());
       }
       _config.Clear();
+    }
+
+    /// <summary>
+    /// Discards all changes that have not been written to disk
+    /// </summary>
+    public void Discard()
+    {
+      _config.Clear();
+      Load();
     }
 
     /// <summary>
@@ -168,6 +188,50 @@ namespace MusicBeePlugin.Settings
       {
         _config[device]["LightbarProgress"].BoolValue = lbprog;
       }
+    }
+
+    /// <summary>
+    /// Return if the device is enabled
+    /// </summary>
+    /// <param name="device">The name of the device</param>
+    /// <returns>The device enabled state or true if unconfigured</returns>
+    public bool GetEnabled(string device)
+    {
+      return !_config[device].Contains("Enabled") || _config[device]["Enabled"].BoolValue;
+    }
+
+    /// <summary>
+    /// Enable or disable the device
+    /// </summary>
+    /// <param name="device">The name of the device</param>
+    /// <param name="enabled">Enabled state</param>
+    public void SetEnabled(string device, bool enabled)
+    {
+      _config[device]["Enabled"].BoolValue = enabled;
+    }
+
+    /// <summary>
+    /// Get the currently selected effect
+    /// </summary>
+    /// <param name="device">The name of the device</param>
+    /// <returns>The selected effect for this device</returns>
+    public AbstractEffectDevice.Effect GetEffect(string device)
+    {
+      if (_config[device].Contains("Effect"))
+      {
+        return (AbstractEffectDevice.Effect) _config[device]?["Effect"].GetValue<AbstractEffectDevice.Effect>();
+      }
+      return AbstractEffectDevice.Effect.None;
+    }
+
+    /// <summary>
+    /// Set the <see cref="AbstractEffectDevice.Effect"/> for this device
+    /// </summary>
+    /// <param name="device">The name of the device</param>
+    /// <param name="effect"><see cref="AbstractEffectDevice.Effect"/> to set</param>
+    public void SetEffect(string device, AbstractEffectDevice.Effect effect)
+    {
+      _config[device]["Effect"].SetValue(effect);
     }
 
     /// <summary>
