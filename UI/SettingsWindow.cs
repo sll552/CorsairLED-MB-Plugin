@@ -16,7 +16,7 @@ namespace MusicBeePlugin.UI
     private readonly List<AbstractEffectDevice> _devices;
     // ReSharper disable once CollectionNeverQueried.Local
     private readonly List<TabPage> _tabPages = new List<TabPage>();
-    private readonly BindingSource _binding = new BindingSource();
+    private BindingSource _binding = new BindingSource();
 
     public SettingsWindow(Plugin.PluginInfo about, DeviceController dc, SettingsManager settingsManager)
     {
@@ -41,6 +41,7 @@ namespace MusicBeePlugin.UI
     private void CL_Settings_OnShown(object sender, EventArgs eventArgs)
     {
       UpdateValues();
+      dataGridView1.AutoResizeColumns();
     }
 
     private void CL_Settings_FormClosing(object sender, FormClosingEventArgs e)
@@ -61,18 +62,21 @@ namespace MusicBeePlugin.UI
       dataGridView1.Columns.Clear();
       dataGridView1.Rows.Clear();
       _binding.Clear();
+      _binding.DataSource = typeof(AbstractEffectDevice);
 
-      foreach (var dev in _devices)
+      foreach (AbstractEffectDevice dev in _devices)
       {
         _binding.Add(dev);
       }
 
       dataGridView1.AutoGenerateColumns = false;
+      dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.DisplayedCells;
       dataGridView1.DataSource = _binding;
 
       dataGridView1.Columns.Add(new DataGridViewTextBoxColumn
       {
         ReadOnly = true,
+        AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill,
         DataPropertyName = "DeviceName",
         Name = "Name"
       });
@@ -95,7 +99,6 @@ namespace MusicBeePlugin.UI
         DataPropertyName = "Enabled",
         Name = "Enabled"
       });
-
     }
 
     private void CreateTabs()

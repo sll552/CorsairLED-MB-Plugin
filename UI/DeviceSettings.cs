@@ -30,6 +30,7 @@ namespace MusicBeePlugin.UI
       else
       {
         colorModeComboBox.Visible = false;
+        label4.Visible = false;
       }
 
       if (_device.DeviceName.Equals("K95 RGB PLATINUM"))

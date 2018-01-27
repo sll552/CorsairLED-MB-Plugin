@@ -78,13 +78,16 @@ namespace MusicBeePlugin.Devices
             case CorsairDeviceType.Unknown:
               break;
             case CorsairDeviceType.Mouse:
+              _devices.Add(new MouseEffectDevice(CueSDK.MouseSDK, _settings, this));
               break;
             case CorsairDeviceType.Keyboard:
               _devices.Add(new KeyboardEffectDevice(CueSDK.KeyboardSDK, _settings, this));
               break;
             case CorsairDeviceType.Headset:
+              _devices.Add(new HeadsetEffectDevice(CueSDK.HeadsetSDK, _settings, this));
               break;
             case CorsairDeviceType.Mousemat:
+              _devices.Add(new MousematEffectDevice(CueSDK.MousematSDK, _settings, this));
               break;
             default:
               throw new ArgumentOutOfRangeException();

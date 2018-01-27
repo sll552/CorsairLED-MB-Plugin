@@ -28,6 +28,7 @@
     /// </summary>
     private void InitializeComponent()
     {
+      System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsWindow));
       this.groupBox1 = new System.Windows.Forms.GroupBox();
       this.dataGridView1 = new System.Windows.Forms.DataGridView();
       this.saveCloseButton = new System.Windows.Forms.Button();
@@ -42,13 +43,15 @@
       // 
       // groupBox1
       // 
-      this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+      this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.groupBox1.Controls.Add(this.dataGridView1);
       this.groupBox1.ForeColor = System.Drawing.SystemColors.ControlText;
       this.groupBox1.Location = new System.Drawing.Point(13, 13);
+      this.groupBox1.MinimumSize = new System.Drawing.Size(200, 50);
       this.groupBox1.Name = "groupBox1";
-      this.groupBox1.Size = new System.Drawing.Size(373, 123);
+      this.groupBox1.Size = new System.Drawing.Size(405, 110);
       this.groupBox1.TabIndex = 0;
       this.groupBox1.TabStop = false;
       this.groupBox1.Text = "Detected Devices";
@@ -57,21 +60,23 @@
       // 
       this.dataGridView1.AllowUserToAddRows = false;
       this.dataGridView1.AllowUserToDeleteRows = false;
+      this.dataGridView1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
       this.dataGridView1.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.DisplayedCellsExceptHeaders;
       this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-      this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
-      this.dataGridView1.Location = new System.Drawing.Point(3, 16);
+      this.dataGridView1.Location = new System.Drawing.Point(6, 16);
       this.dataGridView1.MultiSelect = false;
       this.dataGridView1.Name = "dataGridView1";
       this.dataGridView1.RowHeadersVisible = false;
-      this.dataGridView1.ScrollBars = System.Windows.Forms.ScrollBars.None;
-      this.dataGridView1.Size = new System.Drawing.Size(367, 104);
+      this.dataGridView1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+      this.dataGridView1.Size = new System.Drawing.Size(393, 88);
       this.dataGridView1.TabIndex = 0;
       // 
       // saveCloseButton
       // 
       this.saveCloseButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-      this.saveCloseButton.Location = new System.Drawing.Point(282, 302);
+      this.saveCloseButton.Location = new System.Drawing.Point(314, 266);
       this.saveCloseButton.Name = "saveCloseButton";
       this.saveCloseButton.Size = new System.Drawing.Size(104, 28);
       this.saveCloseButton.TabIndex = 1;
@@ -82,7 +87,7 @@
       // aboutButton
       // 
       this.aboutButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-      this.aboutButton.Location = new System.Drawing.Point(13, 302);
+      this.aboutButton.Location = new System.Drawing.Point(13, 266);
       this.aboutButton.Name = "aboutButton";
       this.aboutButton.Size = new System.Drawing.Size(48, 28);
       this.aboutButton.TabIndex = 4;
@@ -101,13 +106,14 @@
       // 
       // tabControl1
       // 
-      this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+      this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.tabControl1.Controls.Add(this.tabPage2);
-      this.tabControl1.Location = new System.Drawing.Point(13, 142);
+      this.tabControl1.Location = new System.Drawing.Point(13, 129);
+      this.tabControl1.MinimumSize = new System.Drawing.Size(200, 100);
       this.tabControl1.Name = "tabControl1";
       this.tabControl1.SelectedIndex = 0;
-      this.tabControl1.Size = new System.Drawing.Size(373, 152);
+      this.tabControl1.Size = new System.Drawing.Size(405, 128);
       this.tabControl1.TabIndex = 6;
       // 
       // tabPage2
@@ -115,7 +121,7 @@
       this.tabPage2.Location = new System.Drawing.Point(4, 22);
       this.tabPage2.Name = "tabPage2";
       this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-      this.tabPage2.Size = new System.Drawing.Size(365, 126);
+      this.tabPage2.Size = new System.Drawing.Size(397, 102);
       this.tabPage2.TabIndex = 1;
       this.tabPage2.Text = "tabPage2";
       this.tabPage2.UseVisualStyleBackColor = true;
@@ -123,19 +129,19 @@
       // SettingsWindow
       // 
       this.BackColor = System.Drawing.SystemColors.ControlDarkDark;
-      this.ClientSize = new System.Drawing.Size(398, 342);
+      this.ClientSize = new System.Drawing.Size(430, 306);
       this.Controls.Add(this.tabControl1);
       this.Controls.Add(this.messageLabel);
       this.Controls.Add(this.aboutButton);
       this.Controls.Add(this.saveCloseButton);
       this.Controls.Add(this.groupBox1);
-      this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+      this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.MaximizeBox = false;
       this.MinimizeBox = false;
+      this.MinimumSize = new System.Drawing.Size(360, 320);
       this.Name = "SettingsWindow";
       this.ShowIcon = false;
       this.Text = "Corsair LED Plugin Settings";
-      this.TopMost = true;
       this.groupBox1.ResumeLayout(false);
       ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
       this.tabControl1.ResumeLayout(false);

@@ -93,8 +93,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Devices\AbstractEffectDevice.cs" />
+    <Compile Include="Devices\HeadsetEffectDevice.cs" />
     <Compile Include="Devices\ISpectrumDevice.cs" />
     <Compile Include="Devices\KeyboardEffectDevice.cs" />
+    <Compile Include="Devices\MouseEffectDevice.cs" />
+    <Compile Include="Devices\MousematEffectDevice.cs" />
     <Compile Include="Settings\EffectStringConverter.cs" />
     <Compile Include="Settings\ColoringModeStringConverter.cs" />
     <Compile Include="Settings\ColorStringConverter.cs" />
