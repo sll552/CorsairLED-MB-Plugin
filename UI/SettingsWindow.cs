@@ -64,7 +64,7 @@ namespace MusicBeePlugin.UI
       _binding.Clear();
       _binding.DataSource = typeof(AbstractEffectDevice);
 
-      foreach (AbstractEffectDevice dev in _devices)
+      foreach (var dev in _devices)
       {
         _binding.Add(dev);
       }
@@ -99,6 +99,52 @@ namespace MusicBeePlugin.UI
         DataPropertyName = "Enabled",
         Name = "Enabled"
       });
+
+      dataGridView1.CellValueChanged += DataGridView1OnCellValueChanged;
+      dataGridView1.CellMouseUp += DataGridView1OnCellMouseUp;
+
+    }
+
+    // Cancel Edit as soon as MouseUp so that the CellValueChangedEvent is fired
+    private void DataGridView1OnCellMouseUp(object sender, DataGridViewCellMouseEventArgs dataGridViewCellMouseEventArgs)
+    {
+      DataGridViewColumn defaultcolumn = null;
+      foreach (DataGridViewColumn column in dataGridView1.Columns)
+      {
+        if (column.Name != "Default") continue;
+        defaultcolumn = column;
+        break;
+      }
+
+      if (defaultcolumn != null && dataGridViewCellMouseEventArgs.ColumnIndex == defaultcolumn.Index)
+      {
+        dataGridView1.EndEdit();
+      }
+    }
+
+    private void DataGridView1OnCellValueChanged(object sender, DataGridViewCellEventArgs dataGridViewCellEventArgs)
+    {
+      if (dataGridViewCellEventArgs.ColumnIndex != dataGridView1.CurrentCell.ColumnIndex ||
+          dataGridViewCellEventArgs.RowIndex != dataGridView1.CurrentCell.RowIndex) return;
+      DataGridViewColumn defaultcolumn = null;
+      foreach (DataGridViewColumn column in dataGridView1.Columns)
+      {
+        if (column.Name != "Default") continue;
+        defaultcolumn = column;
+        break;
+      }
+
+      if (defaultcolumn == null || dataGridViewCellEventArgs.ColumnIndex != defaultcolumn.Index) return;
+
+      _binding.ResetBindings(false);
+      for (var i = 0; i < dataGridView1.RowCount; i++)
+      {
+        if (i == dataGridViewCellEventArgs.RowIndex)
+        {
+          continue;
+        }
+        dataGridView1.UpdateCellValue(defaultcolumn.Index, i);
+      }
     }
 
     private void CreateTabs()
