@@ -98,6 +98,7 @@
     <Compile Include="Devices\KeyboardEffectDevice.cs" />
     <Compile Include="Devices\MouseEffectDevice.cs" />
     <Compile Include="Devices\MousematEffectDevice.cs" />
+    <Compile Include="Effects\BeatBrush.cs" />
     <Compile Include="Settings\EffectStringConverter.cs" />
     <Compile Include="Settings\ColoringModeStringConverter.cs" />
     <Compile Include="Settings\ColorStringConverter.cs" />

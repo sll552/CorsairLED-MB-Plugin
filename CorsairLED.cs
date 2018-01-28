@@ -221,7 +221,24 @@ namespace MusicBeePlugin
       float[] bardata = CalcBarData(_barcount);
       _devcontroller.Curbardata = bardata;
       _devcontroller.TrackProgress = _mbApiInterface.Player_GetPosition() * 1.0f / _mbApiInterface.NowPlaying_GetDuration();
-      _debugplot?.UpdatePlot(bardata);
+      float beat = CalcBeat(bardata);
+      _devcontroller.Beat = beat;
+      float[] combined = new float[_barcount+3];
+      Array.Copy(bardata, combined, bardata.Length);
+      combined[_barcount + 2] = beat;
+      _debugplot?.UpdatePlot(combined);
+    }
+
+    private float CalcBeat(float[] bardata)
+    {
+      var sum = 0f;
+      var cnt = 0;
+      for (int i = 0; i < bardata.Length/4; i++)
+      {
+        sum += (float) Math.Sqrt(bardata[i]);
+        cnt = i;
+      }
+      return sum/cnt;
     }
 
     private float[] CalcBarData(int barcount)
@@ -231,29 +248,28 @@ namespace MusicBeePlugin
       var ret = _mbApiInterface.NowPlaying_GetSpectrumData(fftdata);
       int jumpwidth = (fftdata.Length/2) / barcount;
       int bar = 0;
+      fftdata[0] /= 2;
+      if (ret <= 0) return bardata;
 
-      if (ret > 0)
+      for (int i = 0; i < fftdata.Length / 2; i += jumpwidth)
       {
-        for (int i = 0; i < fftdata.Length / 2; i += jumpwidth)
+        float avg = 0;
+        for (int j = i; j < i + jumpwidth && j < fftdata.Length / 2; j++)
         {
-          float avg = 0;
-          for (int j = i; j < i + jumpwidth && j < fftdata.Length / 2; j++)
-          {
-            avg += fftdata[j];
-          }
-          avg /= jumpwidth;
-
-          if (bar < bardata.Length - 1)
-          {
-            //bardata[bar] = (float) Math.Sqrt(avg) * 1000f;
-            bardata[bar] = (float)Math.Sqrt(avg) * 10f;
-            //bardata[bar] = (float)Math.Sqrt(avg) * 15f * (1 + (float)Math.Sqrt((double)bar/ (double)_barcount) * 1.25f);
-            //bardata[bar] = (float)Math.Log10(1/(avg*avg)) * 10f;
-          }
-          bar++;
+          avg += fftdata[j];
         }
-        bardata[0] *= 0.6f; 
+        avg /= jumpwidth;
+
+        if (bar < bardata.Length - 1)
+        {
+          //bardata[bar] = (float) Math.Sqrt(avg) * 1000f;
+          bardata[bar] = (float)Math.Sqrt(avg) * 10f;
+          //bardata[bar] = (float)Math.Sqrt(avg) * 15f * (1 + (float)Math.Sqrt((double)bar/ (double)_barcount) * 1.25f);
+          //bardata[bar] = (float)Math.Log10(1/(avg*avg)) * 10f;
+        }
+        bar++;
       }
+      bardata[0] *= 0.5f;
       return bardata;
     }
   }

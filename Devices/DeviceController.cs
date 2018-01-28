@@ -31,6 +31,7 @@ namespace MusicBeePlugin.Devices
       set => _curbardata = value;
     }
     public AbstractEffectDevice[] Devices => IsInitialized ? _devices.ToArray() : null;
+    public float Beat { get; set; }
 
     public DeviceController(Plugin plugin, SettingsManager settingsManager)
     {
@@ -103,7 +104,10 @@ namespace MusicBeePlugin.Devices
 
     internal void UpdateSpectrographData()
     {
-      _plugin.UpdateSpectrographData();
+      lock (_plugin)
+      {
+        _plugin.UpdateSpectrographData();
+      }
     }
 
     private static void UnInit()
