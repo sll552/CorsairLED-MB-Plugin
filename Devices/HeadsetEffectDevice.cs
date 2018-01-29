@@ -11,19 +11,19 @@ namespace MusicBeePlugin.Devices
     {
     }
 
-    public override void StartEffect()
-    {
-      Debug.WriteLine("Headset Start Effect");
-    }
-
-    public override void StopEffect()
-    {
-      Debug.WriteLine("Headset Stop Effect");
-    }
-
     public override IEnumerable<Effect> GetSupportedEffects()
     {
       return new[] { Effect.None };
+    }
+
+    protected override void SpectrographEffectImpl()
+    {
+      throw new System.NotImplementedException();
+    }
+
+    protected override void BeatEffectImpl()
+    {
+      throw new System.NotImplementedException();
     }
   }
 }

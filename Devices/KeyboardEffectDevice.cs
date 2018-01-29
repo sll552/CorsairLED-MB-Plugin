@@ -59,10 +59,8 @@ namespace MusicBeePlugin.Devices
       }
     }
 
-    public override void StartEffect()
+    protected override void SpectrographEffectImpl()
     {
-      if (Settings == null || ActiveEffect != Effect.Spectrograph || !Enabled) return;
-
       Device.Brush = new SolidColorBrush(Settings.GetBackgroundColor(DeviceName));
 
       if (_spectrumGroup != null)
@@ -106,26 +104,9 @@ namespace MusicBeePlugin.Devices
       _spectrumGroup.Attach();
     }
 
-    public override void StopEffect()
+    protected override void BeatEffectImpl()
     {
-      void RemoveGroup(ILedGroup group)
-      {
-        if (group == null) return;
-        group.Brush = new SolidColorBrush(Color.Transparent);
-        Device.Update(true);
-        Device.DetachLedGroup(group);
-        Device.Update(true);
-      }
-
-      if (Device == null) return;
-
-      RemoveGroup(_spectrumGroup);
-      _spectrumGroup = null;
-      RemoveGroup(_progressGroup);
-      _progressGroup = null;
-
-      Device.Brush = null;
-      Device.Update(true);
+      throw new NotImplementedException();
     }
 
     public override IEnumerable<Effect> GetSupportedEffects()

@@ -4,10 +4,10 @@ using CUE.NET.Devices.Generic;
 
 namespace MusicBeePlugin.Effects
 {
-  class BeatBrush : SolidColorBrush
+  public class BeatBrush : SolidColorBrush
   {
-    private float _minbeat = 0;
-    private float _beat = 0;
+    private float _minbeat;
+    private float _beat;
 
     public float Beat
     {
