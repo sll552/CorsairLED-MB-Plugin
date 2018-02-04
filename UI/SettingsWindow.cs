@@ -37,12 +37,20 @@ namespace MusicBeePlugin.UI
 
       FormClosing += CL_Settings_FormClosing;
       Shown += CL_Settings_OnShown;
+      VisibleChanged += OnVisibleChanged;
+    }
+
+    private void OnVisibleChanged(object sender, EventArgs eventArgs)
+    {
+      if (Visible)
+      {
+        UpdateAll();
+      }
     }
 
     private void CL_Settings_OnShown(object sender, EventArgs eventArgs)
     {
-      UpdateValues();
-      dataGridView1.AutoResizeColumns();
+      UpdateAll();
     }
 
     private void CL_Settings_FormClosing(object sender, FormClosingEventArgs e)
@@ -59,11 +67,23 @@ namespace MusicBeePlugin.UI
       Hide();
     }
 
+    private void UpdateAll()
+    {
+      UpdateValues();
+      UpdateDeviceTable();
+      dataGridView1.Refresh();
+      dataGridView1.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
+    }
+
     private void UpdateDeviceTable()
     {
+      dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
+      dataGridView1.DataSource = null;
       dataGridView1.Columns.Clear();
       dataGridView1.Rows.Clear();
+      dataGridView1.Refresh();
       _binding.Clear();
+      _binding.DataSource = null;
       _binding.DataSource = typeof(AbstractEffectDevice);
 
       foreach (var dev in _devices)
@@ -137,21 +157,28 @@ namespace MusicBeePlugin.UI
     {
       if (dataGridViewCellEventArgs.ColumnIndex != dataGridView1.CurrentCell.ColumnIndex ||
           dataGridViewCellEventArgs.RowIndex != dataGridView1.CurrentCell.RowIndex) return;
+
       DataGridViewColumn defaultcolumn = null;
+
       foreach (DataGridViewColumn column in dataGridView1.Columns)
       {
-        if (column.Name != "Default") continue;
-        defaultcolumn = column;
+        switch (column.Name)
+        {
+          case "Default":
+            defaultcolumn = column;
+            break;
+        }
         break;
       }
 
-      if (defaultcolumn == null || dataGridViewCellEventArgs.ColumnIndex != defaultcolumn.Index) return;
-
-      _binding.ResetBindings(false);
-      for (var i = 0; i < dataGridView1.RowCount; i++)
+      if (defaultcolumn != null && dataGridViewCellEventArgs.ColumnIndex == defaultcolumn.Index)
       {
-        if (i == dataGridViewCellEventArgs.RowIndex) continue;
-        dataGridView1.UpdateCellValue(defaultcolumn.Index, i);
+        _binding.ResetBindings(false);
+        for (var i = 0; i < dataGridView1.RowCount; i++)
+        {
+          if (i == dataGridViewCellEventArgs.RowIndex) continue;
+          dataGridView1.UpdateCellValue(defaultcolumn.Index, i);
+        }
       }
     }
 
