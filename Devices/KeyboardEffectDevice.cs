@@ -18,10 +18,12 @@ namespace MusicBeePlugin.Devices
   {
     private ListLedGroup _spectrumGroup;
     private ListLedGroup _progressGroup;
-    private float _max = 1.2f;
-    private float _min = 0.0f;
+    private ListLedGroup _beatGroup;
+    private const float Max = 1.2f;
+    private const float Min = 0.0f;
     private readonly SpectrumBrushFactory _brushFactory;
     private ProgressBrush _progressBrush;
+    private BeatBrush _beatBrush;
     private readonly CorsairLedId[] _lightbarLeds = {
       CorsairLedId.Lightbar1,
       CorsairLedId.Lightbar2,
@@ -57,12 +59,15 @@ namespace MusicBeePlugin.Devices
       {
         _progressBrush.Progress = Controller.TrackProgress;
       }
+      if (_beatBrush != null)
+      {
+        _beatBrush.Beat = Controller.Beat;
+      }
     }
 
     protected override void SpectrographEffectImpl()
     {
       Device.Brush = new SolidColorBrush(Settings.GetBackgroundColor(DeviceName));
-
       if (_spectrumGroup != null)
       {
         _spectrumGroup.Detach();
@@ -106,12 +111,22 @@ namespace MusicBeePlugin.Devices
 
     protected override void BeatEffectImpl()
     {
-      throw new NotImplementedException();
+      if (_beatBrush == null)
+      {
+        _beatBrush = new BeatBrush(Settings.GetPrimaryColor(DeviceName));
+      }
+
+      if (_beatGroup == null)
+      {
+        _beatGroup = new ListLedGroup(Device, false, Device);
+      }
+
+      GenericBeatImpl(_beatBrush, _beatGroup);
     }
 
     public override IEnumerable<Effect> GetSupportedEffects()
     {
-      return new[] { Effect.Spectrograph, Effect.None };
+      return new[] { Effect.Spectrograph, Effect.Beat, Effect.None };
     }
 
     public bool IsInSpectrum(RectangleF rectangle, BrushRenderTarget renderTarget)
@@ -124,11 +139,11 @@ namespace MusicBeePlugin.Devices
       for (var i = 0; i < bardata.Length; i++)
       {
         // make sure that  min < bardata < max
-        bardata[i] = Math.Min(Math.Max(bardata[i], _min), _max);
+        bardata[i] = Math.Min(Math.Max(bardata[i], Min), Max);
       }
 
       var baridx = (int)Math.Min(Math.Floor((renderTarget.Point.X - rectangle.Left) / barwidth), bardata.Length - 1);
-      return (_max - bardata[baridx]) / _max < renderTarget.Point.Y / rectangle.Height;
+      return (Max - bardata[baridx]) / Max < renderTarget.Point.Y / rectangle.Height;
     }
 
     public int GetDesiredBarCount()

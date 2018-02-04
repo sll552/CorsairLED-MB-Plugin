@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using CUE.NET.Devices.Generic.EventArgs;
 using CUE.NET.Devices.Mouse;
 using CUE.NET.Groups;
@@ -39,7 +38,17 @@ namespace MusicBeePlugin.Devices
 
     protected override void BeatEffectImpl()
     {
-      throw new System.NotImplementedException();
+      if (_beatBrush == null)
+      {
+        _beatBrush = new BeatBrush(Settings.GetPrimaryColor(DeviceName));
+      }
+
+      if (_beatGroup == null)
+      {
+        _beatGroup = new ListLedGroup(Device, false, Device);
+      }
+
+      GenericBeatImpl(_beatBrush, _beatGroup);
     }
   }
 }

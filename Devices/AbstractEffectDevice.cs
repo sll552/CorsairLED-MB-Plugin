@@ -74,7 +74,10 @@ namespace MusicBeePlugin.Devices
     /// </summary>
     public void StartEffect()
     {
-      if (Settings == null || !GetSupportedEffects().Contains(ActiveEffect) || !Enabled) return;
+      if (Settings == null || !GetSupportedEffects().Contains(ActiveEffect)) return;
+      StopEffect();
+      if (!Enabled) return;
+
       switch (ActiveEffect)
       {
         case Effect.Spectrograph:
@@ -84,9 +87,7 @@ namespace MusicBeePlugin.Devices
           BeatEffectImpl();
           break;
         case Effect.None:
-          return;
-        default:
-          throw new ArgumentOutOfRangeException();
+          Device.Brush = new SolidColorBrush(Settings.GetBackgroundColor(DeviceName));return;
       }
     }
     /// <summary>
@@ -105,7 +106,7 @@ namespace MusicBeePlugin.Devices
 
       if (Device == null) return;
 
-      var fields = this.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+      var fields = GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
       foreach (var field in fields)
       {
         if (field.FieldType != typeof(ListLedGroup)) continue;
@@ -120,8 +121,13 @@ namespace MusicBeePlugin.Devices
     public abstract IEnumerable<Effect> GetSupportedEffects();
 
     #region Effect implementations
-
+    /// <summary>
+    /// Expect all used LedGroups to be null when this is called
+    /// </summary>
     protected abstract void SpectrographEffectImpl();
+    /// <summary>
+    /// Expect all used LedGroups to be null when this is called
+    /// </summary>
     protected abstract void BeatEffectImpl();
 
     protected void GenericBeatImpl(BeatBrush brush, ListLedGroup beatGroup)
@@ -134,11 +140,8 @@ namespace MusicBeePlugin.Devices
         Device.DetachLedGroup(beatGroup);
       }
 
-      beatGroup = new ListLedGroup(Device, false, Device)
-      {
-        Brush = brush
-      };
-
+      if (beatGroup == null) return;
+      beatGroup.Brush = brush;
       beatGroup.Attach();
     }
 

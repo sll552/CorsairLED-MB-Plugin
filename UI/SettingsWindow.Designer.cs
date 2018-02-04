@@ -51,7 +51,7 @@
       this.groupBox1.Location = new System.Drawing.Point(13, 13);
       this.groupBox1.MinimumSize = new System.Drawing.Size(200, 50);
       this.groupBox1.Name = "groupBox1";
-      this.groupBox1.Size = new System.Drawing.Size(405, 110);
+      this.groupBox1.Size = new System.Drawing.Size(449, 149);
       this.groupBox1.TabIndex = 0;
       this.groupBox1.TabStop = false;
       this.groupBox1.Text = "Detected Devices";
@@ -70,13 +70,13 @@
       this.dataGridView1.Name = "dataGridView1";
       this.dataGridView1.RowHeadersVisible = false;
       this.dataGridView1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-      this.dataGridView1.Size = new System.Drawing.Size(393, 88);
+      this.dataGridView1.Size = new System.Drawing.Size(437, 127);
       this.dataGridView1.TabIndex = 0;
       // 
       // saveCloseButton
       // 
       this.saveCloseButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-      this.saveCloseButton.Location = new System.Drawing.Point(314, 266);
+      this.saveCloseButton.Location = new System.Drawing.Point(358, 316);
       this.saveCloseButton.Name = "saveCloseButton";
       this.saveCloseButton.Size = new System.Drawing.Size(104, 28);
       this.saveCloseButton.TabIndex = 1;
@@ -87,7 +87,7 @@
       // aboutButton
       // 
       this.aboutButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-      this.aboutButton.Location = new System.Drawing.Point(13, 266);
+      this.aboutButton.Location = new System.Drawing.Point(13, 316);
       this.aboutButton.Name = "aboutButton";
       this.aboutButton.Size = new System.Drawing.Size(48, 28);
       this.aboutButton.TabIndex = 4;
@@ -109,11 +109,11 @@
       this.tabControl1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
       this.tabControl1.Controls.Add(this.tabPage2);
-      this.tabControl1.Location = new System.Drawing.Point(13, 129);
+      this.tabControl1.Location = new System.Drawing.Point(13, 168);
       this.tabControl1.MinimumSize = new System.Drawing.Size(200, 100);
       this.tabControl1.Name = "tabControl1";
       this.tabControl1.SelectedIndex = 0;
-      this.tabControl1.Size = new System.Drawing.Size(405, 128);
+      this.tabControl1.Size = new System.Drawing.Size(449, 139);
       this.tabControl1.TabIndex = 6;
       // 
       // tabPage2
@@ -121,7 +121,7 @@
       this.tabPage2.Location = new System.Drawing.Point(4, 22);
       this.tabPage2.Name = "tabPage2";
       this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-      this.tabPage2.Size = new System.Drawing.Size(397, 102);
+      this.tabPage2.Size = new System.Drawing.Size(441, 113);
       this.tabPage2.TabIndex = 1;
       this.tabPage2.Text = "tabPage2";
       this.tabPage2.UseVisualStyleBackColor = true;
@@ -129,7 +129,7 @@
       // SettingsWindow
       // 
       this.BackColor = System.Drawing.SystemColors.ControlDarkDark;
-      this.ClientSize = new System.Drawing.Size(430, 306);
+      this.ClientSize = new System.Drawing.Size(474, 356);
       this.Controls.Add(this.tabControl1);
       this.Controls.Add(this.messageLabel);
       this.Controls.Add(this.aboutButton);

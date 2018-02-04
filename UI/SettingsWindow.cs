@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Windows.Forms;
 using MusicBeePlugin.Devices;
 using MusicBeePlugin.Settings;
@@ -16,7 +17,7 @@ namespace MusicBeePlugin.UI
     private readonly List<AbstractEffectDevice> _devices;
     // ReSharper disable once CollectionNeverQueried.Local
     private readonly List<TabPage> _tabPages = new List<TabPage>();
-    private BindingSource _binding = new BindingSource();
+    private readonly BindingSource _binding = new BindingSource();
 
     public SettingsWindow(Plugin.PluginInfo about, DeviceController dc, SettingsManager settingsManager)
     {
@@ -37,7 +38,7 @@ namespace MusicBeePlugin.UI
       FormClosing += CL_Settings_FormClosing;
       Shown += CL_Settings_OnShown;
     }
-    
+
     private void CL_Settings_OnShown(object sender, EventArgs eventArgs)
     {
       UpdateValues();
@@ -102,21 +103,30 @@ namespace MusicBeePlugin.UI
 
       dataGridView1.CellValueChanged += DataGridView1OnCellValueChanged;
       dataGridView1.CellMouseUp += DataGridView1OnCellMouseUp;
+      dataGridView1.DataBindingComplete += DataGridView1OnDataBindingComplete;
 
+    }
+
+    // Set the combobox datasource for the supported effects for each device
+    private void DataGridView1OnDataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs dataGridViewBindingCompleteEventArgs)
+    {
+      foreach (DataGridViewRow row in dataGridView1.Rows)
+      {
+        if (row.Cells.Count <= dataGridView1.Columns["Effect"]?.Index) continue;
+        if (row.Cells.Count <= dataGridView1.Columns["Name"]?.Index) continue;
+
+        var tmp = (DataGridViewComboBoxCell)row.Cells[dataGridView1.Columns["Effect"].Index];
+        var devname = row.Cells[dataGridView1.Columns["Name"].Index].Value.ToString();
+        var effects = _devices.First(device => device.DeviceName == devname).GetSupportedEffects();
+        var enumerable = effects as AbstractEffectDevice.Effect[] ?? effects.ToArray();
+        tmp.DataSource = enumerable.ToArray();
+      }
     }
 
     // Cancel Edit as soon as MouseUp so that the CellValueChangedEvent is fired
     private void DataGridView1OnCellMouseUp(object sender, DataGridViewCellMouseEventArgs dataGridViewCellMouseEventArgs)
     {
-      DataGridViewColumn defaultcolumn = null;
-      foreach (DataGridViewColumn column in dataGridView1.Columns)
-      {
-        if (column.Name != "Default") continue;
-        defaultcolumn = column;
-        break;
-      }
-
-      if (defaultcolumn != null && dataGridViewCellMouseEventArgs.ColumnIndex == defaultcolumn.Index)
+      if (dataGridViewCellMouseEventArgs.ColumnIndex == dataGridView1.Columns["Default"]?.Index)
       {
         dataGridView1.EndEdit();
       }
@@ -156,8 +166,19 @@ namespace MusicBeePlugin.UI
         var tabpage = new TabPage(dev.DeviceName);
         deviceSettings.Dock = DockStyle.Fill;
         tabpage.Controls.Add(deviceSettings);
-        _tabPages.Add(tabpage);
-        tabControl1.Controls.Add(tabpage);
+        if (dev.IsDefaultDevice)
+        {
+          _tabPages.Insert(0, tabpage);
+        }
+        else
+        {
+          _tabPages.Add(tabpage);
+        }
+      }
+
+      foreach (var page in _tabPages)
+      {
+        tabControl1.Controls.Add(page);
       }
     }
 
