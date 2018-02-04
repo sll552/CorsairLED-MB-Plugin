@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Timers;
 using CUE.NET.Exceptions;
@@ -33,9 +34,9 @@ namespace MusicBeePlugin
       _about.Author = "Stefan Lengauer";
       _about.TargetApplication = "";   // current only applies to artwork, lyrics or instant messenger name that appears in the provider drop down selector or target Instant Messenger
       _about.Type = PluginType.General;
-      _about.VersionMajor = 0;  // your plugin version
-      _about.VersionMinor = 1;
-      _about.Revision = 3;
+      _about.VersionMajor = 1;  // your plugin version
+      _about.VersionMinor = 0;
+      _about.Revision = 0;
       _about.MinInterfaceVersion = MinInterfaceVersion;
       _about.MinApiRevision = MinApiRevision;
       _about.ReceiveNotifications = (ReceiveNotificationFlags.PlayerEvents | ReceiveNotificationFlags.TagEvents);
@@ -43,21 +44,21 @@ namespace MusicBeePlugin
 
       try
       {
-        _devcontroller = new DeviceController(this);
-        _devcontroller.Init();
         _settingsManager = new SettingsManager(_mbApiInterface.Setting_GetPersistentStoragePath() + "CorsairLED\\CorsairLED.settings");
+        _devcontroller = new DeviceController(this, _settingsManager);
+        _devcontroller.Init();
         
         _settingsWindow = new SettingsWindow(_about, _devcontroller, _settingsManager);
         if (DeviceController.IsInitialized)
         {
           _mbApiInterface.MB_AddMenuItem("mnuTools/CL_Show Debug Plot", "HotKey For CL Debug Plot", ShowDebugPlot);
-          _devcontroller.AddSettings(_settingsManager, _settingsWindow);
+          _devcontroller.AddSettings(_settingsWindow);
           _barcount = _devcontroller.GetDesiredBarCount();
         }
       }
       catch (CUEException ex)
       {
-        Console.WriteLine("CUE Exception! ErrorCode: " + Enum.GetName(typeof(CorsairError), ex.Error));
+        Console.WriteLine(@"CUE Exception! ErrorCode: " + Enum.GetName(typeof(CorsairError), ex.Error));
         throw;
       }
       if (!DeviceController.IsInitialized) return null;
@@ -65,7 +66,7 @@ namespace MusicBeePlugin
       // migrate old config
       if (File.Exists(_mbApiInterface.Setting_GetPersistentStoragePath() + "CorsairLED\\CorsairLED.config"))
       {
-        _settingsManager.MigrateFromOld(_mbApiInterface.Setting_GetPersistentStoragePath() + "CorsairLED\\CorsairLED.config", _devcontroller.GetKeyboardModel());
+        _settingsManager.MigrateFromOld(_mbApiInterface.Setting_GetPersistentStoragePath() + "CorsairLED\\CorsairLED.config", _devcontroller.Devices.OfType<KeyboardEffectDevice>().First().DeviceName);
         File.Delete(_mbApiInterface.Setting_GetPersistentStoragePath() + "CorsairLED\\CorsairLED.config");
         _settingsManager.Save();
       }
@@ -220,7 +221,24 @@ namespace MusicBeePlugin
       float[] bardata = CalcBarData(_barcount);
       _devcontroller.Curbardata = bardata;
       _devcontroller.TrackProgress = _mbApiInterface.Player_GetPosition() * 1.0f / _mbApiInterface.NowPlaying_GetDuration();
-      _debugplot?.UpdatePlot(bardata);
+      float beat = CalcBeat(bardata);
+      _devcontroller.Beat = beat;
+      float[] combined = new float[_barcount+3];
+      Array.Copy(bardata, combined, bardata.Length);
+      combined[_barcount + 2] = beat;
+      _debugplot?.UpdatePlot(combined);
+    }
+
+    private float CalcBeat(float[] bardata)
+    {
+      var sum = 0f;
+      var cnt = 0;
+      for (int i = 0; i < bardata.Length/4; i++)
+      {
+        sum += (float) Math.Sqrt(bardata[i]);
+        cnt = i;
+      }
+      return sum/cnt;
     }
 
     private float[] CalcBarData(int barcount)
@@ -230,29 +248,28 @@ namespace MusicBeePlugin
       var ret = _mbApiInterface.NowPlaying_GetSpectrumData(fftdata);
       int jumpwidth = (fftdata.Length/2) / barcount;
       int bar = 0;
+      fftdata[0] /= 2;
+      if (ret <= 0) return bardata;
 
-      if (ret > 0)
+      for (int i = 0; i < fftdata.Length / 2; i += jumpwidth)
       {
-        for (int i = 0; i < fftdata.Length / 2; i += jumpwidth)
+        float avg = 0;
+        for (int j = i; j < i + jumpwidth && j < fftdata.Length / 2; j++)
         {
-          float avg = 0;
-          for (int j = i; j < i + jumpwidth && j < fftdata.Length / 2; j++)
-          {
-            avg += fftdata[j];
-          }
-          avg /= jumpwidth;
-
-          if (bar < bardata.Length - 1)
-          {
-            //bardata[bar] = (float) Math.Sqrt(avg) * 1000f;
-            bardata[bar] = (float)Math.Sqrt(avg) * 10f;
-            //bardata[bar] = (float)Math.Sqrt(avg) * 15f * (1 + (float)Math.Sqrt((double)bar/ (double)_barcount) * 1.25f);
-            //bardata[bar] = (float)Math.Log10(1/(avg*avg)) * 10f;
-          }
-          bar++;
+          avg += fftdata[j];
         }
-        bardata[0] *= 0.6f; 
+        avg /= jumpwidth;
+
+        if (bar < bardata.Length - 1)
+        {
+          //bardata[bar] = (float) Math.Sqrt(avg) * 1000f;
+          bardata[bar] = (float)Math.Sqrt(avg) * 10f;
+          //bardata[bar] = (float)Math.Sqrt(avg) * 15f * (1 + (float)Math.Sqrt((double)bar/ (double)_barcount) * 1.25f);
+          //bardata[bar] = (float)Math.Log10(1/(avg*avg)) * 10f;
+        }
+        bar++;
       }
+      bardata[0] *= 0.5f;
       return bardata;
     }
   }

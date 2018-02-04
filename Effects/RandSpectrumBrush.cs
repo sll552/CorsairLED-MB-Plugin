@@ -8,16 +8,16 @@ namespace MusicBeePlugin.Effects
 {
   class RandSpectrumBrush : RandomColorBrush
   {
-    private readonly DeviceController _controller;
+    private readonly ISpectrumDevice _device;
 
-    public RandSpectrumBrush(DeviceController controller)
+    public RandSpectrumBrush(ISpectrumDevice device)
     {
-      _controller = controller ?? throw new ArgumentNullException(nameof(controller));
+      _device = device ?? throw new ArgumentNullException(nameof(device));
     }
 
     protected override CorsairColor GetColorAtPoint(RectangleF rectangle, BrushRenderTarget renderTarget)
     {
-      return _controller.IsInSpectrum(rectangle,renderTarget) ? base.GetColorAtPoint(rectangle, renderTarget) : CorsairColor.Transparent;
+      return _device.IsInSpectrum(rectangle,renderTarget) ? base.GetColorAtPoint(rectangle, renderTarget) : CorsairColor.Transparent;
     }
   }
 }

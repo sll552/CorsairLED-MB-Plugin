@@ -15,11 +15,11 @@ namespace MusicBeePlugin.Effects
       Random
     }
 
-    private readonly DeviceController _controller;
+    private readonly ISpectrumDevice _device;
 
-    public SpectrumBrushFactory(DeviceController controller)
+    public SpectrumBrushFactory(ISpectrumDevice device)
     {
-      _controller = controller ?? throw new ArgumentNullException(nameof(controller));
+      _device = device ?? throw new ArgumentNullException(nameof(device));
     }
 
     public IBrush GetSpectrumBrush(ColoringMode mode, Color primColor)
@@ -27,11 +27,11 @@ namespace MusicBeePlugin.Effects
       switch (mode)
       {
         case ColoringMode.Solid:
-          return new SolidSpectrumBrush(primColor, _controller);
+          return new SolidSpectrumBrush(primColor, _device);
         case ColoringMode.Gradient:
-          return new LinGradSpectrumBrush(new RainbowGradient(primColor.GetHue(), primColor.GetHue() + 360f),_controller);
+          return new LinGradSpectrumBrush(new RainbowGradient(primColor.GetHue(), primColor.GetHue() + 360f), _device);
         case ColoringMode.Random:
-          return new RandSpectrumBrush(_controller);
+          return new RandSpectrumBrush(_device);
         default:
           return null;
       }
