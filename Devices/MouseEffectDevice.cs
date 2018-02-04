@@ -29,7 +29,7 @@ namespace MusicBeePlugin.Devices
 
     public override IEnumerable<Effect> GetSupportedEffects()
     {
-      return new[] {Effect.None};
+      return new[] {Effect.None, Effect.Beat};
     }
 
     protected override void SpectrographEffectImpl()
