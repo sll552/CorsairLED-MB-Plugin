@@ -49,6 +49,7 @@ namespace MusicBeePlugin.UI
     {
       if (e.CloseReason != CloseReason.UserClosing) return;
       Hide();
+      _settingsManager.Discard();
       e.Cancel = true;
     }
 
@@ -149,10 +150,7 @@ namespace MusicBeePlugin.UI
       _binding.ResetBindings(false);
       for (var i = 0; i < dataGridView1.RowCount; i++)
       {
-        if (i == dataGridViewCellEventArgs.RowIndex)
-        {
-          continue;
-        }
+        if (i == dataGridViewCellEventArgs.RowIndex) continue;
         dataGridView1.UpdateCellValue(defaultcolumn.Index, i);
       }
     }
