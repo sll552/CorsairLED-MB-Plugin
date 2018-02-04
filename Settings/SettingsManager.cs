@@ -41,14 +41,29 @@ namespace MusicBeePlugin.Settings
     public SettingsManager(string config)
     {
       ConfigFile = config ?? throw new ArgumentNullException();
-      Configuration.RegisterTypeStringConverter(new ColorStringConverter());
-      Configuration.RegisterTypeStringConverter(new ColoringModeStringConverter());
-      Configuration.RegisterTypeStringConverter(new EffectStringConverter());
+
+      RegisterConverter(new ColorStringConverter());
+      RegisterConverter(new ColoringModeStringConverter());
+      RegisterConverter(new EffectStringConverter());
+
       if (Path.GetDirectoryName(ConfigFile) != null && !Directory.Exists(Path.GetDirectoryName(ConfigFile)))
       {
         Directory.CreateDirectory(Path.GetDirectoryName(ConfigFile) ?? throw new InvalidOperationException());
       }
       Load();
+    }
+
+    private static void RegisterConverter(ITypeStringConverter converter)
+    {
+      try
+      {
+        Configuration.RegisterTypeStringConverter(converter);
+      }
+      catch (InvalidOperationException)
+      {
+        Configuration.DeregisterTypeStringConverter(converter.ConvertibleType);
+        Configuration.RegisterTypeStringConverter(converter);
+      }
     }
 
     /// <summary>
