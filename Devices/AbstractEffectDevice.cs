@@ -114,7 +114,7 @@ namespace MusicBeePlugin.Devices
         field.SetValue(this, null);
       }
 
-      Device.Brush = null;
+      Device.Brush = new SolidColorBrush(Color.Transparent);
       Device.Update(true);
     }
 
