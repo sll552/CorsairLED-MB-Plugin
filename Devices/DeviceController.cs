@@ -90,6 +90,9 @@ namespace MusicBeePlugin.Devices
             case CorsairDeviceType.Mousemat:
               _devices.Add(new MousematEffectDevice(CueSDK.MousematSDK, _settings, this));
               break;
+            case CorsairDeviceType.HeadsetStand:
+              _devices.Add(new HeadsetStandEffectDevice(CueSDK.HeadsetStandSDK, _settings, this));
+              break;
             default:
               throw new ArgumentOutOfRangeException();
           }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using CUE.NET.Devices.Generic.EventArgs;
 using CUE.NET.Devices.Headset;
 using CUE.NET.Groups;
@@ -9,8 +10,8 @@ namespace MusicBeePlugin.Devices
 {
   class HeadsetEffectDevice : AbstractEffectDevice
   {
-    private BeatBrush _beatBrush = null;
-    private ListLedGroup _beatGroup = null;
+    private BeatBrush _beatBrush;
+    private ListLedGroup _beatGroup;
 
     public HeadsetEffectDevice(CorsairHeadset device, SettingsManager settings, DeviceController controller) : base(device, settings, controller)
     {
@@ -33,7 +34,7 @@ namespace MusicBeePlugin.Devices
 
     protected override void SpectrographEffectImpl()
     {
-      throw new System.NotImplementedException();
+      throw new NotImplementedException();
     }
 
     protected override void BeatEffectImpl()

@@ -1,19 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using CUE.NET.Devices.Generic;
 using CUE.NET.Devices.Generic.EventArgs;
-using CUE.NET.Devices.Mouse;
 using CUE.NET.Groups;
 using MusicBeePlugin.Effects;
 using MusicBeePlugin.Settings;
 
 namespace MusicBeePlugin.Devices
 {
-  class MouseEffectDevice : AbstractEffectDevice
+  class HeadsetStandEffectDevice : AbstractEffectDevice
   {
     private BeatBrush _beatBrush;
     private ListLedGroup _beatGroup;
 
-    public MouseEffectDevice(CorsairMouse device, SettingsManager settings, DeviceController controller) : base(device, settings, controller)
+    public HeadsetStandEffectDevice(AbstractCueDevice device, SettingsManager settings, DeviceController controller) : base(device, settings, controller)
     {
       Device.Updated += DeviceOnUpdated;
     }
@@ -29,7 +29,7 @@ namespace MusicBeePlugin.Devices
 
     public override IEnumerable<Effect> GetSupportedEffects()
     {
-      return new[] {Effect.None};
+      return new[] { Effect.Beat, Effect.None };
     }
 
     protected override void SpectrographEffectImpl()
