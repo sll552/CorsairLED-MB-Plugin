@@ -260,7 +260,7 @@ namespace MusicBeePlugin
         }
         avg /= jumpwidth;
 
-        if (bar < bardata.Length - 1)
+        if (bar < bardata.Length)
         {
           //bardata[bar] = (float) Math.Sqrt(avg) * 1000f;
           bardata[bar] = (float)Math.Sqrt(avg) * 10f;
