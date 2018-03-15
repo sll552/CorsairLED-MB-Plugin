@@ -36,7 +36,7 @@ namespace MusicBeePlugin
       _about.Type = PluginType.General;
       _about.VersionMajor = 1;  // your plugin version
       _about.VersionMinor = 0;
-      _about.Revision = 0;
+      _about.Revision = 1;
       _about.MinInterfaceVersion = MinInterfaceVersion;
       _about.MinApiRevision = MinApiRevision;
       _about.ReceiveNotifications = (ReceiveNotificationFlags.PlayerEvents | ReceiveNotificationFlags.TagEvents);
@@ -260,7 +260,7 @@ namespace MusicBeePlugin
         }
         avg /= jumpwidth;
 
-        if (bar < bardata.Length - 1)
+        if (bar < bardata.Length)
         {
           //bardata[bar] = (float) Math.Sqrt(avg) * 1000f;
           bardata[bar] = (float)Math.Sqrt(avg) * 10f;

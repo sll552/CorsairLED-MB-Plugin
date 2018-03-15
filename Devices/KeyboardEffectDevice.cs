@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using CUE.NET.Brushes;
+using CUE.NET.Devices.Generic;
 using CUE.NET.Devices.Generic.Enums;
 using CUE.NET.Devices.Generic.EventArgs;
 using CUE.NET.Devices.Keyboard;
@@ -148,14 +149,29 @@ namespace MusicBeePlugin.Devices
 
     public int GetDesiredBarCount()
     {
-      // This spans a ledgroup over the number row of the keyboard which is most likely the row with the most keys
-      var rectangleLedGroup = new RectangleLedGroup(Device,
-        new PointF(0f, Device[CorsairKeyboardLedId.D1].LedRectangle.Location.Y),
-        new PointF(Device.DeviceRectangle.Width + 10,
-          Device[CorsairKeyboardLedId.Backspace].LedRectangle.Location.Y * 1.1f), 0.1f, false);
+      // go over each row on the keybaord to determine the max leds in a row
+      CorsairLed[] ledlist =
+      {
+        Device[CorsairLedId.Escape],
+        Device[CorsairLedId.D1],
+        Device[CorsairLedId.Tab],
+        Device[CorsairLedId.CapsLock],
+        Device[CorsairLedId.LeftShift],
+        Device[CorsairLedId.LeftCtrl]
+      };
+      int barcnt = 0;
 
-      return rectangleLedGroup.GetLeds().Count();
+      foreach (var led in ledlist)
+      {
+        var lg = new RectangleLedGroup(Device, new PointF(0f, led.LedRectangle.Location.Y),
+          new PointF(Device.DeviceRectangle.Width + 10, led.LedRectangle.Bottom), 0.1f, false);
+        var cnt = lg.GetLeds().Count();
+        if (cnt > barcnt)
+        {
+          barcnt = cnt;
+        }
+      }
+      return barcnt;
     }
-
   }
 }
