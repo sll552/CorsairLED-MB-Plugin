@@ -171,7 +171,7 @@ namespace MusicBeePlugin.Devices
           barcnt = cnt;
         }
       }
-      return barcnt;
+      return barcnt > 0 ? barcnt : 21;
     }
   }
 }
