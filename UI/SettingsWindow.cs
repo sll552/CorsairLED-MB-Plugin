@@ -157,18 +157,7 @@ namespace MusicBeePlugin.UI
       if (dataGridViewCellEventArgs.ColumnIndex != dataGridView1.CurrentCell.ColumnIndex ||
           dataGridViewCellEventArgs.RowIndex != dataGridView1.CurrentCell.RowIndex) return;
 
-      DataGridViewColumn defaultcolumn = null;
-
-      foreach (DataGridViewColumn column in dataGridView1.Columns)
-      {
-        switch (column.Name)
-        {
-          case "Default":
-            defaultcolumn = column;
-            break;
-        }
-        break;
-      }
+      DataGridViewColumn defaultcolumn = dataGridView1.Columns["Default"];
 
       if (defaultcolumn != null && dataGridViewCellEventArgs.ColumnIndex == defaultcolumn.Index)
       {
