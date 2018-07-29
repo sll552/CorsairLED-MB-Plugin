@@ -81,6 +81,11 @@ namespace MusicBeePlugin.UI
       dataGridView1.DataSource = null;
       dataGridView1.Columns.Clear();
       dataGridView1.Rows.Clear();
+
+      dataGridView1.CellValueChanged += DataGridView1OnCellValueChanged;
+      dataGridView1.CellMouseUp += DataGridView1OnCellMouseUp;
+      dataGridView1.CellClick += DataGridView1OnCellClick;
+
       dataGridView1.Refresh();
       _binding.Clear();
       _binding.DataSource = null;
@@ -122,20 +127,14 @@ namespace MusicBeePlugin.UI
         Name = "Enabled"
       });
 
-      dataGridView1.CellValueChanged += DataGridView1OnCellValueChanged;
-      dataGridView1.CellMouseUp += DataGridView1OnCellMouseUp;
-      dataGridView1.DataBindingComplete += DataGridView1OnDataBindingComplete;
-
     }
 
     // Set the combobox datasource for the supported effects for each device
-    private void DataGridView1OnDataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs dataGridViewBindingCompleteEventArgs)
+    private void DataGridView1OnCellClick(object sender, DataGridViewCellEventArgs e)
     {
-      foreach (DataGridViewRow row in dataGridView1.Rows)
+      if (e.ColumnIndex == dataGridView1.Columns["Effect"]?.Index)
       {
-        if (row.Cells.Count <= dataGridView1.Columns["Effect"]?.Index) continue;
-        if (row.Cells.Count <= dataGridView1.Columns["Name"]?.Index) continue;
-
+        var row = dataGridView1.Rows[e.RowIndex];
         var tmp = (DataGridViewComboBoxCell)row.Cells[dataGridView1.Columns["Effect"].Index];
         var devname = row.Cells[dataGridView1.Columns["Name"].Index].Value.ToString();
         var effects = _devices.First(device => device.DeviceName == devname).GetSupportedEffects();
@@ -158,18 +157,7 @@ namespace MusicBeePlugin.UI
       if (dataGridViewCellEventArgs.ColumnIndex != dataGridView1.CurrentCell.ColumnIndex ||
           dataGridViewCellEventArgs.RowIndex != dataGridView1.CurrentCell.RowIndex) return;
 
-      DataGridViewColumn defaultcolumn = null;
-
-      foreach (DataGridViewColumn column in dataGridView1.Columns)
-      {
-        switch (column.Name)
-        {
-          case "Default":
-            defaultcolumn = column;
-            break;
-        }
-        break;
-      }
+      DataGridViewColumn defaultcolumn = dataGridView1.Columns["Default"];
 
       if (defaultcolumn != null && dataGridViewCellEventArgs.ColumnIndex == defaultcolumn.Index)
       {
