@@ -61,8 +61,7 @@ namespace MusicBeePlugin
         Console.WriteLine(@"CUE Exception! ErrorCode: " + Enum.GetName(typeof(CorsairError), ex.Error));
         throw;
       }
-      if (!DeviceController.IsInitialized) return null;
-
+      
       // migrate old config
       if (File.Exists(_mbApiInterface.Setting_GetPersistentStoragePath() + "CorsairLED\\CorsairLED.config"))
       {
@@ -77,6 +76,12 @@ namespace MusicBeePlugin
 
       Debug.WriteLine(_about.Name + " loaded");
       Debug.WriteLine("MusicBee Version" + _mbApiInterface.MusicBeeVersion);
+
+      if (!DeviceController.IsInitialized)
+      {
+        Console.WriteLine("Could not initialize CUE SDK");
+      }
+
       return _about;
     }
 
@@ -119,6 +124,7 @@ namespace MusicBeePlugin
     // you need to set about.ReceiveNotificationFlags = PlayerEvents to receive all notifications, and not just the startup event
     public void ReceiveNotification(string sourceFileUrl, NotificationType type)
     {
+      if (!DeviceController.IsInitialized) return;
       // perform some action depending on the notification type
       switch (type)
       {
