@@ -42,6 +42,9 @@ namespace MusicBeePlugin.Settings
     {
       ConfigFile = config ?? throw new ArgumentNullException();
 
+      Configuration.IgnoreInlineComments = true;
+      Configuration.IgnorePreComments = true;
+
       RegisterConverter(new ColorStringConverter());
       RegisterConverter(new ColoringModeStringConverter());
       RegisterConverter(new EffectStringConverter());
