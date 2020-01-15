@@ -42,6 +42,9 @@ namespace MusicBeePlugin.Settings
     {
       ConfigFile = config ?? throw new ArgumentNullException();
 
+      Configuration.IgnoreInlineComments = true;
+      Configuration.IgnorePreComments = true;
+
       RegisterConverter(new ColorStringConverter());
       RegisterConverter(new ColoringModeStringConverter());
       RegisterConverter(new EffectStringConverter());
@@ -163,7 +166,18 @@ namespace MusicBeePlugin.Settings
     {
       const string key = "ColoringMode";
       var section = GetSectionForDev(device, key);
-      return section?[key].GetValue<SpectrumBrushFactory.ColoringMode>() ?? SpectrumBrushFactory.ColoringMode.Solid;
+      SpectrumBrushFactory.ColoringMode ret;
+
+      try
+      {
+        ret = section?[key]?.GetValue<SpectrumBrushFactory.ColoringMode>() ?? SpectrumBrushFactory.ColoringMode.Solid;
+      }
+      catch (SettingValueCastException)
+      {
+        ret = SpectrumBrushFactory.ColoringMode.Solid;
+      }
+
+      return ret;
     }
 
     /// <summary>

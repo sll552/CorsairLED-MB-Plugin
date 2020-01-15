@@ -80,8 +80,8 @@
     <Reference Include="CUE.NET, Version=1.2.0.1, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>packages\CUE.NET.1.2.0.1\lib\net45\CUE.NET.dll</HintPath>
     </Reference>
-    <Reference Include="SharpConfig, Version=3.2.5.0, Culture=neutral, PublicKeyToken=c1deedac91bd7724, processorArchitecture=MSIL">
-      <HintPath>packages\sharpconfig.3.2.5\lib\net20\SharpConfig.dll</HintPath>
+    <Reference Include="SharpConfig, Version=3.2.8.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\sharpconfig.3.2.8\lib\net20\SharpConfig.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />

@@ -27,6 +27,7 @@ namespace MusicBeePlugin.UI
 
       InitializeComponent();
 
+      _devices = new List<AbstractEffectDevice>(0);
       if (DeviceController.IsInitialized)
       {
         _devices = new List<AbstractEffectDevice>(_deviceController.Devices);
